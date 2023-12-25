@@ -1,0 +1,221 @@
+@import "../common/fonts.scss";
+
+.restaurant-menu-container {
+  background-color: #121212;
+  .restaurant-menu {
+    max-width: 1440px;
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 64px;
+    padding-top: 40px;
+
+    @media screen and (min-width: 768px) {
+      padding-left: 32px;
+      padding-right: 32px;
+      padding-bottom: 80px;
+      padding-top: 80px;
+    }
+    @media screen and (min-width: 1440px) {
+      padding-bottom: 100px;
+      padding-top: 100px;
+    }
+    .restaurant-menu-title {
+      @include adaptiv-font(40, 32);
+      color: #f6f6f6;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.8px;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+      text-align: center;
+      @media screen and (min-width: 768px) {
+        margin-bottom: 64px;
+      }
+      @media screen and (min-width: 1440px) {
+        margin-bottom: 100px;
+      }
+    }
+    .slider-restaurant-menu {
+      @media screen and (min-width: 1440px) {
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-content: space-between;
+        flex-wrap: wrap;
+        max-width: 1104px;
+        gap: 74px 50px;
+      }
+      .slick-track {
+        display: flex;
+        // justify-content: space-between;
+      }
+      .restaurant-menu-slider-box {
+        max-width: 516px;
+        width: 100%;
+
+        margin: 0 auto;
+        .restaurant-menu-blocks {
+          .restaurant-menu-suptitle {
+            color: #f6f6f6;
+            @include adaptiv-font(24, 18);
+            font-style: italic;
+            line-height: 1;
+            letter-spacing: -0.48px;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+          }
+          .restaurant-menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 29px;
+            .restaurant-menu-item {
+              display: flex;
+              gap: 8px;
+              flex-direction: column;
+              position: relative;
+              &::after {
+                content: "";
+                width: 100%;
+                display: block;
+                position: absolute;
+                left: 0;
+                bottom: -15px;
+                height: 1px;
+                background: rgb(56, 56, 59);
+                filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+              }
+              .restaurant-menu-wrap-name {
+                display: flex;
+                justify-content: space-between;
+                .restaurant-menu-name {
+                  color: #f6f6f6;
+                  padding-left: 20px;
+                  font-weight: 500;
+                  line-height: 1.28;
+                  @include adaptiv-font(18, 14);
+                  letter-spacing: -0.28px;
+                  position: relative;
+
+                  &::after {
+                    content: "";
+                    border-radius: 50%;
+                    position: absolute;
+                    display: block;
+                    width: 5px;
+                    height: 5px;
+                    background-color: #fff;
+                    left: 6px;
+                    top: 6px;
+                  }
+                }
+                .restaurant-menu-grams {
+                  color: #d8d7d7;
+
+                  @include adaptiv-font(14, 12);
+                  font-style: normal;
+                  font-weight: 400;
+                  line-height: 1.16;
+                  letter-spacing: -0.24px;
+                  white-space: nowrap;
+                }
+                .restaurant-menu-price {
+                  color: #f6f6f6;
+                  font-size: 18px;
+                  font-style: normal;
+                  font-weight: 700;
+                  line-height: 1.33;
+                  letter-spacing: -0.36px;
+                }
+              }
+              .restaurant-menu-wrap-ingredients {
+                display: flex;
+                justify-content: space-between;
+                .restaurant-menu-list-ingredients {
+                  color: rgba(216, 215, 215, 0.5);
+                  font-family: DM Sans;
+                  @include adaptiv-font(12, 10);
+                  font-weight: 400;
+                  line-height: 1.4;
+                  letter-spacing: 1.8px;
+                  max-width: 233px;
+                  @media screen and (min-width: 1440px) {
+                    max-width: 345px;
+                  }
+                }
+                .restaurant-menu-price {
+                  color: #f6f6f6;
+                  @include adaptiv-font(18, 14);
+                  font-style: normal;
+                  font-weight: 700;
+                  line-height: 1.28;
+                  letter-spacing: -0.28px;
+                  white-space: nowrap;
+                }
+              }
+            }
+          }
+          .restaurant-menu-drinks {
+            margin-top: 32px;
+          }
+        }
+      }
+    }
+
+    .slider-btns {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 53px;
+      margin-bottom: 40px;
+
+      @media screen and (min-width: 1440px) {
+        display: none;
+      }
+
+      .restaurant-slider-btn-prev,
+      .restaurant-slider-btn-next {
+        border: none;
+        background-color: transparent;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        @media screen and (min-width: 768px) {
+          width: 36px;
+          height: 36px;
+        }
+      }
+
+      .slick-disabled img {
+        filter: brightness(0) saturate(100%) invert(35%) sepia(3%) saturate(17%)
+          hue-rotate(314deg) brightness(93%) contrast(91%);
+      }
+
+      .restaurant-slider-btn-prev img,
+      .restaurant-slider-btn-next img {
+        width: 12px;
+        height: 12px;
+
+        @media screen and (min-width: 768px) {
+          width: 15px;
+          height: 15px;
+        }
+      }
+    }
+    .restaurant-menu-btn {
+      display: block;
+      margin-top: 50px;
+      margin-left: auto;
+      margin-right: auto;
+      @media screen and (min-width: 768px) {
+        margin-left: 0;
+      }
+      @media screen and (min-width: 1440px) {
+        margin-left: 134px;
+      }
+    }
+  }
+}

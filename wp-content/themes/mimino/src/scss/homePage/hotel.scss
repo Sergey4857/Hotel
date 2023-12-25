@@ -1,0 +1,183 @@
+@import "../common/fonts.scss";
+
+.hotel-container-homepage {
+  background: #121212;
+  .hotel {
+    max-width: 1440px;
+    width: 100%;
+    padding-top: 32px;
+    padding-right: 20px;
+    padding-bottom: 32px;
+    padding-left: 20px;
+    @media screen and (min-width: 768px) {
+      padding-top: 45px;
+      padding-right: 32px;
+      padding-bottom: 45px;
+      padding-left: 32px;
+      position: relative;
+    }
+  }
+  .hotel-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin-bottom: 32px;
+
+    @media screen and (min-width: 768px) {
+      margin-bottom: 80px;
+      display: flex;
+      gap: 32px;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .hotel-title {
+      color: #f6f6f6;
+      @include adaptiv-font(68, 40);
+      font-weight: 500;
+      letter-spacing: -1.36px;
+      text-transform: uppercase;
+    }
+    .hotel-text {
+      color: #f6f6f6;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.28;
+      letter-spacing: -0.28px;
+      text-transform: uppercase;
+      @media screen and (min-width: 768px) {
+        max-width: 362px;
+      }
+    }
+  }
+  .hotel-pictures {
+    margin-bottom: 40px;
+
+    .pictures-wrap {
+      display: grid;
+      column-gap: 20px;
+      row-gap: 30px;
+      grid-template-rows: 72% 22%;
+      grid-template-columns: 48% 48%;
+      justify-content: center;
+
+      @media screen and (min-width: 768px) {
+        display: grid;
+        max-width: 1124px;
+        grid-template-columns: 25% 46% 25%;
+        grid-template-rows: 34% 25% 34%;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 0 auto;
+      }
+      @media screen and (min-width: 1440px) {
+        grid-template-rows: 260px 260px;
+        grid-template-columns: 320px 420px 320px;
+        max-height: 548px;
+        gap: 32px 28px;
+      }
+
+      .picture-1 {
+        grid-row: 2;
+        grid-column: 2;
+
+        @media screen and (min-width: 768px) {
+          grid-row: 1;
+          grid-column: 1;
+        }
+
+        img {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .picture-2 {
+        grid-column-start: span 2;
+
+        @media screen and (min-width: 768px) {
+          grid-column: 2;
+          grid-row: span 3;
+        }
+        @media screen and (min-width: 1440px) {
+          grid-column: 2;
+          grid-row: span 2;
+        }
+        img {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .picture-3 {
+        grid-row: 2;
+        @media screen and (min-width: 768px) {
+          grid-row: 2 /4;
+        }
+        @media screen and (min-width: 1440px) {
+          grid-row: 2;
+        }
+        img {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .picture-4 {
+        @media screen and (max-width: 767px) {
+          display: none;
+        }
+        @media screen and (min-width: 768px) {
+          grid-row: span 2;
+        }
+        @media screen and (min-width: 1440px) {
+          grid-row: 1;
+          grid-column: 3;
+        }
+
+        img {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .picture-5 {
+        @media screen and (min-width: 768px) {
+          grid-row: 3;
+          grid-column: 3;
+        }
+
+        @media screen and (max-width: 767px) {
+          display: none;
+        }
+
+        @media screen and (min-width: 1440px) {
+          grid-row: 2;
+          grid-column: 3;
+        }
+
+        img {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+  }
+  .hotel-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    @media screen and (min-width: 1440px) {
+      position: absolute;
+      top: 65px;
+      right: 39px;
+    }
+
+    .hotel-button {
+    }
+    .hotel-view-btn {
+      display: inline-block;
+    }
+  }
+}

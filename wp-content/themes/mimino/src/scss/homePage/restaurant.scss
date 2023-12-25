@@ -1,0 +1,171 @@
+@import "../common/fonts.scss";
+//@include adaptiv-font(18, 14);
+
+.restaurant {
+  max-width: 1440px;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+
+  @media screen and (min-width: 768px) {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .restaurant-desc-wrapper {
+    margin-bottom: 32px;
+
+    @media screen and (min-width: 768px) {
+      margin-bottom: 80px;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .restaurant-title {
+      @include adaptiv-font(68, 40);
+      color: #121212;
+      font-weight: 500;
+      letter-spacing: -1.36px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+
+      @media screen and (min-width: 768px) {
+        margin-bottom: 0;
+      }
+    }
+
+    .restaurant-desc {
+      color: #121212;
+      font-family: DM Sans;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.28;
+      letter-spacing: -0.28px;
+      text-transform: uppercase;
+
+      @media screen and (min-width: 768px) {
+        max-width: 221px;
+      }
+    }
+  }
+
+  .restaurant-details-slider {
+    position: relative;
+    width: 100%;
+    margin-bottom: 40px;
+    @media screen and (min-width: 1440px) {
+      margin-bottom: 0;
+    }
+
+    .restaurant-img-wrapper {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 18px;
+
+      @media screen and (min-width: 768px) {
+        margin-bottom: 32px;
+      }
+      @media screen and (min-width: 1440px) {
+        margin-bottom: 50px;
+      }
+
+      .slick-list {
+        .slick-track {
+          div {
+            max-width: 157px;
+            height: 100%;
+
+            &:not(:last-child) {
+              margin-right: 20px;
+
+              @media screen and (min-width: 768px) {
+                margin-right: 32px;
+              }
+            }
+
+            @media screen and (min-width: 768px) {
+              max-width: 336px;
+            }
+
+            @media screen and (min-width: 1440px) {
+              max-width: 266px;
+            }
+          }
+        }
+      }
+    }
+
+    .slider-container-main-restaurant {
+    }
+
+    .btn-slider-wrapper {
+      display: flex;
+      gap: 20px;
+      @media screen and (min-width: 1440px) {
+        justify-content: center;
+        gap: 32px;
+      }
+
+      .btn-slider-left,
+      .btn-slider-right {
+        border: none;
+        background-color: transparent;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        @media screen and (min-width: 768px) {
+          width: 36px;
+          height: 36px;
+        }
+      }
+
+      .slick-disabled img {
+        filter: brightness(0) saturate(100%) invert(86%) sepia(0%)
+          saturate(2420%) hue-rotate(317deg) brightness(82%) contrast(93%);
+      }
+
+      .btn-slider-left img,
+      .btn-slider-right img {
+        width: 12px;
+        height: 12px;
+
+        @media screen and (min-width: 768px) {
+          width: 15px;
+          height: 15px;
+        }
+      }
+    }
+  }
+
+  .restaurant-button-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+
+    @media screen and (min-width: 1440px) {
+      position: absolute;
+      top: 20px;
+      right: 44px;
+    }
+
+    .book-table-btn,
+    .menu-btn {
+      padding: 8px 18px;
+      color: #121212;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.28;
+      letter-spacing: -0.28px;
+      text-transform: uppercase;
+      border-radius: 32px;
+      border: 0.8px solid #121212;
+    }
+  }
+}

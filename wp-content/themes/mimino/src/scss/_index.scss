@@ -1,0 +1,59 @@
+/* utils */
+
+/* base */
+@use "./base/common.scss";
+@use "./base/reset.scss";
+@use "./utils/variables.scss";
+
+/* common */
+
+@use "./common/header.scss";
+@use "./common/footer.scss";
+@use "./common/fonts.scss";
+
+/* components */
+@use "./components/button-modal.scss";
+@use "./components/button-top.scss";
+@use "./components/button.scss";
+@use "./components/hover-button.scss";
+@use "./components/menu-navigation.scss";
+@use "./components/socials-icon.scss";
+@use "./components/visually-hidden.scss";
+
+/* modal-windows */
+
+@use "./modal-windows/book-a-room.scss";
+@use "./modal-windows/book-a-table.scss";
+@use "./modal-windows/prices-per-room.scss";
+@use "./modal-windows/tecnical-works-modal.scss";
+
+/* mobile-menu */
+@use "./modal-windows/mobile-menu.scss";
+
+/* pages */
+
+/* homePage */
+@use "./homePage/about.scss";
+@use "./homePage/hero-home.scss";
+@use "./homePage/hotel.scss";
+@use "./homePage/location.scss";
+@use "./homePage/restaurant.scss";
+@use "./homePage/welcome.scss";
+
+/* hotel  */
+
+@use "./hotelPage/double-room.scss";
+@use "./hotelPage/four-seater-room.scss";
+@use "./hotelPage/hero-hotel.scss";
+@use "./hotelPage/triple-room.scss";
+
+/* restaurant */
+
+@use "./restaurantPage/about-restaurant.scss";
+@use "./restaurantPage/hero-restaurant.scss";
+@use "./restaurantPage/restaurant-menu.scss";
+
+/* room  */
+
+@use "./roomPage/hero.scss";
+@use "./roomPage/amenities.scss";

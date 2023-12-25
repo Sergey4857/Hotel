@@ -1,0 +1,183 @@
+/* Hotel-hero */
+@import "../common/fonts.scss";
+
+.hotel-container {
+  background-color: #f6f6f6;
+
+  .hotel {
+    width: 100%;
+    max-width: 1440px;
+    overflow: hidden;
+    padding: 40px 20px 64px 20px;
+
+    @media screen and (min-width: 768px) {
+      padding: 40px 36px 156px 36px;
+    }
+
+    @media screen and (min-width: 1440px) {
+      padding: 30px 32px 130px 32px;
+      height: calc(100vh - 78px);
+    }
+
+    .hotel-hero-wrap {
+      position: relative;
+      @media screen and (min-width: 1440px) {
+        display: flex;
+      }
+
+      .hotel-hero-box {
+        @media screen and (min-width: 1440px) {
+          width: 50%;
+          padding-top: 204px;
+          position: relative;
+        }
+        .hotel-hero-content {
+          @media screen and (min-width: 1440px) {
+            position: absolute;
+            top: 50%;
+            transform: translate(0, -50%);
+          }
+          .hotel-hero-title {
+            color: #121212;
+            margin-bottom: 24px;
+            @include adaptiv-font(90, 80);
+            font-weight: 400;
+            line-height: 1;
+            letter-spacing: -0.8px;
+            text-transform: uppercase;
+
+            @media screen and (min-width: 768px) {
+              letter-spacing: -1.6px;
+              margin-bottom: 32px;
+            }
+            @media screen and (min-width: 1440px) {
+              letter-spacing: -0.8px;
+            }
+          }
+
+          .hotel-hero-btns {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 40px;
+
+            @media screen and (min-width: 768px) {
+              margin-bottom: 54px;
+            }
+            @media screen and (min-width: 1440px) {
+              gap: 14px;
+              margin-bottom: 0;
+            }
+
+            .room-btn,
+            .prices-btn {
+            }
+          }
+        }
+      }
+
+      .hotel-hero-wrapper {
+        @media screen and (min-width: 1440px) {
+          width: 50%;
+        }
+
+        .slider {
+          margin-bottom: 24px;
+          @media screen and (min-width: 768px) {
+            margin-bottom: 40px;
+          }
+
+          @media screen and (min-width: 1440px) {
+            margin-bottom: 16px;
+            height: 70vh;
+          }
+
+          .slick-list {
+            width: 100%;
+
+            .slick-track {
+              display: flex;
+              gap: 20px;
+
+              @media screen and (min-width: 768px) {
+                gap: 32px;
+              }
+              @media screen and (min-width: 1440px) {
+                height: 100%;
+              }
+              .slider-box picture img {
+                @media screen and (min-width: 1440px) {
+                  display: block;
+                  height: 100%;
+                }
+              }
+            }
+          }
+        }
+
+        .slider-btns {
+          display: flex;
+          justify-content: flex-end;
+          gap: 20px;
+          margin-bottom: 40px;
+
+          @media screen and (min-width: 1440px) {
+            justify-content: flex-start;
+            gap: 32px;
+            margin-bottom: 0;
+          }
+
+          .slider-btn-prev,
+          .slider-btn-next {
+            border: none;
+            background-color: transparent;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            @media screen and (min-width: 768px) {
+              width: 36px;
+              height: 36px;
+            }
+          }
+
+          .slick-disabled img {
+            filter: brightness(0) saturate(100%) invert(86%) sepia(0%)
+              saturate(2420%) hue-rotate(317deg) brightness(82%) contrast(93%);
+          }
+
+          .slider-btn-prev img,
+          .slider-btn-next img {
+            width: 12px;
+            height: 12px;
+
+            @media screen and (min-width: 768px) {
+              width: 15px;
+              height: 15px;
+            }
+          }
+        }
+        .hotel-hero-text {
+          color: #121212;
+          @include adaptiv-font(18, 14);
+          font-weight: 400;
+          line-height: 1.28;
+          letter-spacing: 0.7px;
+          text-transform: uppercase;
+
+          @media screen and (min-width: 768px) {
+            max-width: 350px;
+            position: absolute;
+            bottom: -47px;
+            left: 0;
+          }
+          @media screen and (min-width: 1440px) {
+            bottom: 0px;
+            max-width: 446px;
+          }
+        }
+      }
+    }
+  }
+}

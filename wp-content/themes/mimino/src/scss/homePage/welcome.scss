@@ -1,0 +1,115 @@
+@import "../common/fonts.scss";
+
+.welcome-container {
+  .welcome {
+    max-width: 1440px;
+    width: 100%;
+    padding-top: 64px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 64px;
+    @media screen and (min-width: 768px) {
+      padding-top: 80px;
+      padding-left: 32px;
+      padding-right: 32px;
+      padding-bottom: 80px;
+    }
+
+    @media screen and (min-width: 1024px) {
+      display: flex;
+      flex-direction: row-reverse;
+      gap: 32px;
+      justify-content: flex-end;
+    }
+    @media screen and (min-width: 1440px) {
+      padding-top: 100px;
+      padding-bottom: 100px;
+    }
+
+    .information {
+      @media screen and (min-width: 1024px) {
+        width: 50%;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .welcome-title {
+        color: #000;
+        @include adaptiv-font(36, 32);
+
+        line-height: 1.12;
+        letter-spacing: -0.64px;
+        text-transform: uppercase;
+        margin-bottom: 32px;
+        @media screen and (min-width: 768px) {
+          margin-bottom: 50px;
+        }
+        @media screen and (min-width: 1024px) {
+          max-width: 434px;
+        }
+
+        .italic-style {
+          font-style: italic;
+          font-weight: 500;
+        }
+      }
+      .welcome-list {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        margin-bottom: 32px;
+        @media screen and (min-width: 768px) {
+          flex-direction: row;
+          margin-bottom: 30px;
+        }
+
+        @media screen and (min-width: 1024px) {
+          flex-direction: column;
+          margin-bottom: 0;
+          max-width: 434px;
+        }
+
+        .welcome-item {
+          color: #000;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 1.28;
+          letter-spacing: -0.28px;
+          text-transform: uppercase;
+          @media screen and (min-width: 768px) {
+            width: 40%;
+          }
+          @media screen and (min-width: 1024px) {
+            width: 100%;
+          }
+        }
+        .welcome-item-second {
+          color: #000;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 1.28;
+          letter-spacing: -0.28px;
+          text-transform: uppercase;
+          @media screen and (min-width: 768px) {
+            width: 60%;
+          }
+          @media screen and (min-width: 1024px) {
+            width: 100%;
+          }
+        }
+      }
+    }
+    .picture {
+      @media screen and (min-width: 1024px) {
+        width: 50%;
+      }
+      img {
+        @media screen and (min-width: 768px) {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

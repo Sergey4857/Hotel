@@ -1,0 +1,297 @@
+@import "../common/fonts.scss";
+
+.about-container {
+  .about {
+    max-width: 1440px;
+    padding-top: 64px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 64px;
+    @media screen and (min-width: 768px) {
+      padding-top: 80px;
+      padding-left: 32px;
+      padding-right: 32px;
+      padding-bottom: 80px;
+    }
+    @media screen and (min-width: 1440px) {
+      padding-top: 100px;
+      padding-left: 32px;
+      padding-right: 32px;
+      padding-bottom: 100px;
+    }
+
+    .about-wrapper {
+      @media screen and (min-width: 1440px) {
+        display: flex;
+        gap: 107px;
+        margin-bottom: 100px;
+      }
+      .about-restaurant-box {
+        position: relative;
+        margin-bottom: 32px;
+        @media screen and (min-width: 1440px) {
+          width: 58%;
+          margin-bottom: 0;
+        }
+
+        .about-complex-1 {
+          margin-bottom: 20px;
+          display: block;
+          @media screen and (min-width: 425px) and (max-width: 767px) {
+            width: 80%;
+          }
+
+          @media screen and (min-width: 1440px) {
+            margin-bottom: 0;
+          }
+
+          img {
+            @media screen and (min-width: 376px) {
+              width: 90%;
+            }
+            @media screen and (min-width: 768px) {
+              width: 66%;
+            }
+          }
+        }
+        .about-complex-2 {
+          @media screen and (min-width: 768px) {
+          }
+          img {
+            @media screen and (min-width: 376px) {
+              width: 70%;
+            }
+
+            @media screen and (min-width: 768px) {
+              width: 55%;
+              position: absolute;
+              top: 35%;
+              right: 0%;
+            }
+            @media screen and (min-width: 1440px) {
+            }
+          }
+        }
+        .about-wrap {
+          position: absolute;
+          top: 67%;
+          right: 0;
+          border-radius: 6px;
+          background: #121212;
+
+          box-shadow: 1px 7px 22px 0px rgba(0, 0, 0, 0.1);
+          display: flex;
+          gap: 12px;
+          padding-top: 10px;
+          padding-bottom: 10px;
+          padding-left: 14px;
+          padding-right: 67px;
+          @media screen and (min-width: 768px) {
+            position: absolute;
+            top: 29%;
+            right: 17%;
+          }
+          .about-review-img {
+          }
+
+          .about-review-content {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            .about-review-name {
+              color: #f6f6f6;
+              font-size: 14px;
+            }
+            .about-review-desc {
+              display: flex;
+              align-items: center;
+              gap: 5px;
+              color: #575757;
+              font-size: 12px;
+              .about-review-rating {
+                color: #f6f6f6;
+                font-size: 12px;
+              }
+            }
+          }
+        }
+      }
+      .about-restaurant-complex {
+        p:not(:last-child) {
+          margin-bottom: 20px;
+        }
+        margin-bottom: 64px;
+        @media screen and (min-width: 1440px) {
+          width: 38%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          margin-bottom: 0;
+        }
+
+        .about-restaurant-complex-subtitle {
+          color: #484848;
+
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 1.16;
+          letter-spacing: 2.16px;
+          text-transform: uppercase;
+          margin-bottom: 18px;
+        }
+        .about-restaurant-desc {
+          color: #121212;
+          @include adaptiv-font(18, 14);
+          font-style: normal;
+          font-weight: 500;
+          line-height: 1.28;
+          letter-spacing: -0.28px;
+          text-transform: uppercase;
+          @media screen and (min-width: 768px) {
+            width: 68%;
+          }
+          @media screen and (min-width: 1440px) {
+            width: 100%;
+          }
+        }
+      }
+    }
+    .business-class-hotel-wrapper {
+      position: relative;
+
+      @media screen and (min-width: 1024px) and (max-width: 1439px) {
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 20%;
+      }
+
+      @media screen and (min-width: 1440px) {
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 82px;
+      }
+      .business-class-hotel-img {
+        margin-bottom: 54px;
+        @media screen and (min-width: 768px) {
+          margin-bottom: 40px;
+          position: relative;
+        }
+
+        @media screen and (min-width: 1440px) {
+          margin-bottom: 0;
+        }
+        .about-complex-img-4 {
+          @media screen and (min-width: 768px) {
+            display: flex;
+            justify-content: flex-end;
+          }
+        }
+        .review-wrapper {
+          display: flex;
+          border-radius: 6px;
+          background: #121212;
+
+          box-shadow: 1px 7px 22px 0px rgba(0, 0, 0, 0.1);
+          padding-top: 12px;
+          padding-left: 14px;
+          padding-bottom: 12px;
+          padding-right: 67px;
+          position: absolute;
+          left: 0;
+          bottom: 59%;
+
+          @media screen and (min-width: 768px) {
+            position: absolute;
+            left: auto;
+            right: 428px;
+            bottom: 125px;
+            width: 122px;
+          }
+          @media screen and (min-width: 1440px) {
+            position: absolute;
+            right: 428px;
+            bottom: 125px;
+            width: 131px;
+          }
+
+          .alexander-review-img {
+          }
+          .review-content {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            .review-name {
+              color: #f6f6f6;
+              font-size: 14px;
+            }
+            .review-desc {
+              display: flex;
+              align-items: center;
+              gap: 5px;
+              color: #575757;
+              font-size: 12px;
+              .review-rating {
+                color: #f6f6f6;
+                font-size: 12px;
+              }
+            }
+          }
+        }
+      }
+
+      .business-class-hotel-content {
+        @media screen and (min-width: 570px) {
+          display: flex;
+          flex-direction: row-reverse;
+          justify-content: flex-end;
+          gap: 32px;
+        }
+        @media screen and (min-width: 1024px) {
+          display: flex;
+          flex-direction: column-reverse;
+        }
+        @media screen and (min-width: 1440px) {
+          gap: 54px;
+          flex-direction: row-reverse;
+        }
+
+        .business-class-hotel-text {
+          margin-bottom: 40px;
+          @media screen and (min-width: 570px) {
+            margin-bottom: 0;
+          }
+          @media screen and (min-width: 1440px) {
+            padding-top: 127px;
+          }
+
+          .about-complex-subtitle {
+            color: #484848;
+
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1.16;
+            letter-spacing: 2.16px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+          }
+          .about-complex-desc {
+            color: #121212;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.28;
+            letter-spacing: -0.28px;
+            text-transform: uppercase;
+            max-width: 263px;
+          }
+        }
+        .about-complex-img-3 {
+          @media screen and (min-width: 1440px) {
+            padding-top: 127px;
+          }
+        }
+      }
+    }
+  }
+}
