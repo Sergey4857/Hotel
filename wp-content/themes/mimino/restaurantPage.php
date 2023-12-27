@@ -191,26 +191,102 @@ $restaurant_menu_section = get_field("section-restaurant-menu");
           <?php echo $about_kitchen_section["about-kitchen-text-1"]; ?>
 
 
-          <!-- At Mimino, we are experts in
-          <span class="italic-text">meat preparation.</span> Our chefs use only
-          the finest and freshest ingredients to
-          <span class="italic-text">create delicious dishes</span> that showcase
-          the flavors of premium cuts of meat. -->
         </p>
       </li>
       <li class="about-kitchen-text-item">
         <p class="about-kitchen-text">
           <?php echo $about_kitchen_section["about-kitchen-text-2"]; ?>
 
-          <!-- Our <span class="italic-text">slow-cooking process</span> and expert
-          seasoning bring out the best in each dish, making for an unforgettable
-          dining experience. Come taste the magic
-          <span class="italic-text">of meat preparation at</span> Mimino. -->
         </p>
       </li>
     </ul>
   </div>
 </section>
+
+
+<section class="blog-container">
+  <div class="blog">
+
+    <div class="blog-content">
+
+      <h2 class="blog-title">dishes of the month</h2>
+      <div class="blog-wrapper">
+        <div class="slider-blog">
+          <div class="blog-item">
+            <div class="blog-disk-box">
+              <p class="blog-dish-title">Cheese soup with chicken</p>
+              <p class="blog-dish-description">Rich, cheesy chicken queso soup made with three types of cheeses, tender
+                chicken, green chiles, and spices—all the flavors of cheese queso but in a soup! The creamiest, most
+                flavorful
+                Chicken Cheese Soup.</p>
+            </div>
+            <img
+              src="<?php echo get_template_directory_uri() . "./src/images/blog-dish/Chicken-Mac-and-Cheese-Soup_Header_800x550.jpeg?>"; ?>"
+              alt="Cheese soup">
+          </div>
+
+          <div class="blog-item">
+
+            <div class="blog-disk-box">
+              <p class="blog-dish-title">Gorbusha in white wine</p>
+              <p class="blog-dish-description">Fish in white wine sauce is a classic recipe that combines the delicate
+                flavors
+                of white fish with the richness of a Chardonnay-infused sauce bursting with herbs, garlic and lemon.</p>
+            </div>
+
+            <img
+              src="<?php echo get_template_directory_uri() . "./src/images/blog-dish/1677842334_food-pibig-info-p-riba-v-souse-na-skovorode-krasivo-83.jpg?>"; ?>"
+              alt="Gorbusha">
+          </div>
+
+
+          <div class="blog-item">
+            <div class="blog-disk-box">
+              <p class="blog-dish-title">French fries</p>
+              <p class="blog-dish-description">French fries, side dish or snack typically made from deep-fried potatoes
+                that
+                have been cut into various shapes, especially thin strips. Fries are often salted and served with other
+                items,
+                including ketchup, mayonnaise, or vinegar.</p>
+            </div>
+            <img src="<?php echo get_template_directory_uri() . "./src/images/blog-dish/maxresdefault.jpg?>"; ?>"
+              alt="french fries">
+          </div>
+
+          <div class="blog-item">
+            <div class="blog-disk-box">
+              <p class="blog-dish-title">Tiramisu</p>
+              <p class="blog-dish-description">Tiramisu is an elegant and rich layered Italian dessert made with
+                delicate
+                ladyfinger cookies, espresso or instant espresso, mascarpone cheese, eggs, sugar, Marsala wine, rum and
+                cocoa
+                powder.</p>
+            </div>
+            <img src="<?php echo get_template_directory_uri() . "./src/images/blog-dish/Tiramisu.jpg?>"; ?>"
+              alt="Cheese soup">
+          </div>
+        </div>
+        <div class="slider-btns">
+          <button type="button" class="slider-btn-prev">
+            <img src=" <?php echo get_template_directory_uri() . "/src/icons/slider-left-white.svg" ?>" alt="left">
+          </button>
+
+          <button type="button" class="slider-btn-next">
+            <img src=" <?php echo get_template_directory_uri() . "/src/icons/slider-right-white.svg" ?>" alt="left">
+          </button>
+        </div>
+
+      </div>
+
+
+
+
+
+
+    </div>
+</section>
+
+
 
 <section class="restaurant-menu-container" id="restaurant-menu">
   <div class="restaurant-menu">

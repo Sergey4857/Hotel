@@ -5,13 +5,6 @@ Template Name: homePage
 ?>
 
 <?php get_header();
-
-$hero_section = get_field("hero_section");
-$about_section = get_field("section-about");
-$restaurant_section = get_field("section-restaurant");
-$welcome_section = get_field("section-welcome");
-$hotel_section = get_field("section-hotel");
-$location_section = get_field("section-location");
 ?>
 
 
@@ -22,18 +15,18 @@ $location_section = get_field("section-location");
 		<div class="hero">
 			<div class="hero-wrapper">
 				<h1 class="hero-title animate__animated animate__fadeInDown animate__delay-1s">
-					<?php echo $hero_section["hero_title"]; ?>
+					<?php the_field("hero_title"); ?>
 				</h1>
 				<div class="hero-wrap-item">
 					<div class="hero-btns animate__animated animate__bounceIn animate__delay-1s">
 
 						<button type="button" class="white-button js-open-modal" data-modal="book-room">
-							<?php echo $hero_section["button-1"]; ?>
+							<?php the_field("button-1"); ?>
 						</button>
 
 
 						<button type="button" class="white-button  js-open-modal" data-modal="book-table">
-							<?php echo $hero_section["button-2"]; ?>
+							<?php the_field("button-2"); ?>
 						</button>
 
 					</div>
@@ -45,7 +38,7 @@ $location_section = get_field("section-location");
 				<li class="hero-item-desc">
 
 					<p class="hero-desc">
-						<?php echo $hero_section["hero-desc-1"]; ?>
+						<?php the_field("hero-desc-1"); ?>
 					</p>
 
 
@@ -53,7 +46,7 @@ $location_section = get_field("section-location");
 				<li class="hero-item-desc">
 
 					<p class="hero-desc">
-						<?php echo $hero_section["hero-desc-2"]; ?>
+						<?php the_field("hero-desc-2"); ?>
 					</p>
 
 				</li>
@@ -115,13 +108,13 @@ $location_section = get_field("section-location");
 
 				<div class="about-restaurant-complex">
 					<h3 class="about-restaurant-complex-subtitle">
-						<?php echo $about_section["about-subtitle-1"]; ?>
+						<?php the_field("about-subtitle-1"); ?>
 					</h3>
 					<p class="about-restaurant-desc">
-						<?php echo $about_section["about-restaurant-desc-1"]; ?>
+						<?php the_field("about-restaurant-desc-1"); ?>
 					</p>
 					<p class="about-restaurant-desc">
-						<?php echo $about_section["about-restaurant-desc-2"]; ?>
+						<?php the_field("about-restaurant-desc-2"); ?>
 					</p>
 				</div>
 			</div>
@@ -160,10 +153,10 @@ $location_section = get_field("section-location");
 				<div class="business-class-hotel-content">
 					<div class="business-class-hotel-text">
 						<h3 class="about-complex-subtitle">
-							<?php echo $about_section["about-subtitle-2"]; ?>
+							<?php the_field("about-subtitle-2"); ?>
 						</h3>
 						<p class="about-complex-desc">
-							<?php echo $about_section["about-restaurant-desc-3"]; ?>
+							<?php the_field("about-restaurant-desc-3"); ?>
 						</p>
 					</div>
 					<picture class="about-complex-img-3">
@@ -189,10 +182,10 @@ $location_section = get_field("section-location");
 
 		<div class="restaurant-desc-wrapper">
 			<h2 class="restaurant-title">
-				<?php echo $restaurant_section["restaurant-title"]; ?>
+				<?php the_field("restaurant-title"); ?>
 			</h2>
 			<p class="restaurant-desc">
-				<?php echo $restaurant_section["restaurant-desc"]; ?>
+				<?php the_field("restaurant-desc"); ?>
 			</p>
 		</div>
 
@@ -317,11 +310,11 @@ $location_section = get_field("section-location");
 
 		<div class="restaurant-button-wrapper">
 			<button type="button" class="black-button js-open-modal" data-modal="book-table">
-				<?php echo $restaurant_section["restaurant-button-1"]; ?>
+				<?php the_field("restaurant-button-1"); ?>
 			</button>
 
 			<a class="black-button" href="restaurantpage/">
-				<?php echo $restaurant_section["restaurant-button-2"]; ?>
+				<?php the_field("restaurant-button-2"); ?>
 			</a>
 		</div>
 	</section>
@@ -331,15 +324,15 @@ $location_section = get_field("section-location");
 			<div class="information">
 				<h2 class="welcome-title">
 
-					<?php echo $welcome_section["welcome-title"]; ?>
+					<?php the_field("welcome-title"); ?>
 
 				</h2>
 				<ul class="welcome-list">
 					<li class="welcome-item">
-						<?php echo $welcome_section["welcome-desc-1"]; ?>
+						<?php the_field("welcome-desc-1"); ?>
 					</li>
 					<li class="welcome-item-second">
-						<?php echo $welcome_section["welcome-desc-2"]; ?>
+						<?php the_field("welcome-desc-2"); ?>
 					</li>
 				</ul>
 			</div>
@@ -364,10 +357,10 @@ $location_section = get_field("section-location");
 		<div class="hotel">
 			<div class="hotel-wrap">
 				<h2 class="hotel-title">
-					<?php echo $hotel_section["hotel-title"]; ?>
+					<?php the_field("hotel-title"); ?>
 				</h2>
 				<p class="hotel-text">
-					<?php echo $hotel_section["hotel-text"]; ?>
+					<?php the_field("hotel-text"); ?>
 				</p>
 			</div>
 			<div class="hotel-pictures">
@@ -454,11 +447,11 @@ $location_section = get_field("section-location");
 			</div>
 			<div class="hotel-buttons">
 				<button type="button" class="hotel-button js-open-modal white-button" data-modal="book-room">
-					<?php echo $hotel_section["hotel-button-1"]; ?>
+					<?php the_field("hotel-button-1"); ?>
 				</button>
 
 				<a class="hotel-view-btn white-button" href="roompage/">
-					<?php echo $hotel_section["hotel-button-2"]; ?>
+					<?php the_field("hotel-button-2"); ?>
 				</a>
 
 
@@ -470,7 +463,7 @@ $location_section = get_field("section-location");
 		<div class="location">
 			<div class="location-content">
 				<h2 class="location-title">
-					<?php echo $location_section["location-title"]; ?>
+					<?php the_field("location-title"); ?>
 				</h2>
 
 				<iframe title="our location" class="map"
@@ -481,25 +474,23 @@ $location_section = get_field("section-location");
 				<address class="locations-contacts">
 					<div class="location-wrap">
 						<div class="location-country">
-							<?php echo $location_section["location-country"]; ?>
+							<?php the_field("location-country"); ?>
 						</div>
 						<div class="location-address">
-							<?php echo $location_section["location-address"]; ?>
+							<?php the_field("location-address"); ?>
 						</div>
 					</div>
 
 					<div class="locations-phones">
 						<div class="locations-phones-title">
-							<?php echo $location_section["location-locations-phones-title"]; ?>
+							<?php the_field("location-locations-phones-title"); ?>
 						</div>
 						<ul class="contacts-list">
-							<li class="contacts-item"><a class="contacts-link"
-									href="tel:<?php echo $location_section["location-telephone-1"]; ?>">
-									<?php echo $location_section["location-telephone-1"]; ?>
+							<li class="contacts-item"><a class="contacts-link" href="tel:<?php the_field("location-telephone-1"); ?>">
+									<?php the_field("location-telephone-1"); ?>
 								</a></li>
-							<li class="contacts-item"><a class="contacts-link"
-									href="tel:<?php echo $location_section["location-telephone-2"]; ?>">
-									<?php echo $location_section["location-telephone-2"]; ?>
+							<li class="contacts-item"><a class="contacts-link" href="tel:<?php the_field("location-telephone-2"); ?>">
+									<?php the_field("location-telephone-2"); ?>
 								</a></li>
 						</ul>
 					</div>

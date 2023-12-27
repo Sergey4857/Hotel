@@ -83,6 +83,8 @@ function mimino_scripts()
 
 	wp_enqueue_script('mimino-slider-hotel', get_template_directory_uri() . '/src/js/slider-hotel.js', array('jquery'), "_S_VERSION", true);
 
+	wp_enqueue_script('mimino-slider-blog', get_template_directory_uri() . '/src/js/blog-slider.js', array('jquery'), "_S_VERSION", true);
+
 	//Подключение хедер-скролл
 	wp_enqueue_script('scroll-header', get_template_directory_uri() . '/src/js/scroll-header-btn-top.js', array(), "_S_VERSION", true);
 
