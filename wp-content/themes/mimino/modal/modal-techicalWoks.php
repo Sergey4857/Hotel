@@ -1,9 +1,9 @@
 <div class="backdrop is-hidden" data-modal="techical-modal">
   <div class="techical-modal modal">
     <button class="modal-close-btn" type="button">
-      <svg width="28" height="28">
+      <!-- <svg width="28" height="28">
         <use href="./img/icons/sprite.svg#close-x"></use>
-      </svg>
+      </svg> -->
     </button>
     <h2 class="techical-title">Sorry, we're doing some techical work on the site</h2>
     <p class="techical-text">

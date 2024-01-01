@@ -141,26 +141,33 @@ class Addons extends \WPForms\Admin\Addons\Addons {
 	 *
 	 * @param bool $force Whether to force the addons retrieval or re-use option cache.
 	 *
-	 * @return array
+	 * @return array|bool
 	 */
 	protected function get_urls( $force = false ) {
 
 		if ( empty( $this->license['key'] ) ) {
-			return [];
+			return false;
 		}
 
-		if ( $force ) {
-			return $this->get_remote_urls();
+		// Avoid multiple requests to the database.
+		static $urls = null;
+
+		if ( is_null( $urls ) ) {
+			$urls = Transient::get( 'addons_urls' );
 		}
 
-		$urls = Transient::get( 'addons_urls' );
-
-		// We store an empty array if the request isn't valid to prevent spam requests.
-		if ( is_array( $urls ) ) {
+		if ( ! $force && ! empty( $urls ) ) {
 			return $urls;
 		}
 
-		return $this->get_remote_urls();
+		// Avoid multiple remote requests.
+		static $remote_urls = null;
+
+		if ( is_null( $remote_urls ) ) {
+			$remote_urls = $this->get_remote_urls();
+		}
+
+		return $remote_urls;
 	}
 
 	/**
@@ -168,17 +175,17 @@ class Addons extends \WPForms\Admin\Addons\Addons {
 	 *
 	 * @since 1.6.6
 	 *
-	 * @return array List of addon URLs data.
+	 * @return bool|array False if no key or failure, array of addon URLs data otherwise.
 	 */
 	protected function get_remote_urls() {
 
-		$addons = wpforms()->get( 'license' )->get_addons();
+		$addons = wpforms()->license->perform_remote_request( 'get-addons-data', [ 'tgm-updater-key' => $this->license['key'] ] );
 
 		// If there was an API error, set transient for only 10 minutes.
-		if ( empty( $addons ) ) {
-			Transient::set( 'addons_urls', [], 10 * MINUTE_IN_SECONDS );
+		if ( ! $addons || isset( $addons->error ) ) {
+			Transient::set( 'addons_urls', false, 10 * MINUTE_IN_SECONDS );
 
-			return [];
+			return false;
 		}
 
 		$urls = [];

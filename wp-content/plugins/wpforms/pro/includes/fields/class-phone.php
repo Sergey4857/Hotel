@@ -12,7 +12,7 @@ class WPForms_Field_Phone extends WPForms_Field {
 	 *
 	 * @since 1.6.3
 	 */
-	const INTL_VERSION = '18.1.6';
+	const INTL_VERSION = '17.0.17';
 
 	/**
 	 * Primary class constructor.
@@ -22,24 +22,23 @@ class WPForms_Field_Phone extends WPForms_Field {
 	public function init() {
 
 		// Define field type information.
-		$this->name     = esc_html__( 'Phone', 'wpforms' );
-		$this->keywords = esc_html__( 'telephone, mobile, cell', 'wpforms' );
-		$this->type     = 'phone';
-		$this->icon     = 'fa-phone';
-		$this->order    = 50;
-		$this->group    = 'fancy';
+		$this->name  = esc_html__( 'Phone', 'wpforms' );
+		$this->type  = 'phone';
+		$this->icon  = 'fa-phone';
+		$this->order = 50;
+		$this->group = 'fancy';
 
 		// Define additional field properties.
-		add_filter( 'wpforms_field_properties_phone', [ $this, 'field_properties' ], 5, 3 );
+		add_filter( 'wpforms_field_properties_phone', array( $this, 'field_properties' ), 5, 3 );
 
 		// Form frontend CSS enqueues.
-		add_action( 'wpforms_frontend_css', [ $this, 'enqueue_frontend_css' ] );
+		add_action( 'wpforms_frontend_css', array( $this, 'enqueue_frontend_css' ) );
 
 		// Form frontend JS enqueues.
-		add_action( 'wpforms_frontend_js', [ $this, 'enqueue_frontend_js' ] );
+		add_action( 'wpforms_frontend_js', array( $this, 'enqueue_frontend_js' ) );
 
 		// Add frontend strings.
-		add_action( 'wpforms_frontend_strings', [ $this, 'add_frontend_strings' ] );
+		add_action( 'wpforms_frontend_strings', array( $this, 'add_frontend_strings' ) );
 	}
 
 	/**
@@ -179,10 +178,9 @@ class WPForms_Field_Phone extends WPForms_Field {
 		 */
 
 		// Options open markup.
-		$args = [
+		$args = array(
 			'markup' => 'open',
-		];
-
+		);
 		$this->field_option( 'basic-options', $field, $args );
 
 		// Label.
@@ -192,34 +190,31 @@ class WPForms_Field_Phone extends WPForms_Field {
 		$lbl  = $this->field_element(
 			'label',
 			$field,
-			[
+			array(
 				'slug'    => 'format',
 				'value'   => esc_html__( 'Format', 'wpforms' ),
 				'tooltip' => esc_html__( 'Select format for the phone form field', 'wpforms' ),
-			],
+			),
 			false
 		);
-
 		$fld  = $this->field_element(
 			'select',
 			$field,
-			[
+			array(
 				'slug'    => 'format',
 				'value'   => ! empty( $field['format'] ) ? esc_attr( $field['format'] ) : 'smart',
-				'options' => [
+				'options' => array(
 					'smart'         => esc_html__( 'Smart', 'wpforms' ),
 					'us'            => esc_html__( 'US', 'wpforms' ),
 					'international' => esc_html__( 'International', 'wpforms' ),
-				],
-			],
+				),
+			),
 			false
 		);
-
-		$args = [
+		$args = array(
 			'slug'    => 'format',
 			'content' => $lbl . $fld,
-		];
-
+		);
 		$this->field_element( 'row', $field, $args );
 
 		// Description.
@@ -229,10 +224,9 @@ class WPForms_Field_Phone extends WPForms_Field {
 		$this->field_option( 'required', $field );
 
 		// Options close markup.
-		$args = [
+		$args = array(
 			'markup' => 'close',
-		];
-
+		);
 		$this->field_option( 'basic-options', $field, $args );
 
 		/*
@@ -240,10 +234,9 @@ class WPForms_Field_Phone extends WPForms_Field {
 		 */
 
 		// Options open markup.
-		$args = [
+		$args = array(
 			'markup' => 'open',
-		];
-
+		);
 		$this->field_option( 'advanced-options', $field, $args );
 
 		// Size.
@@ -375,12 +368,12 @@ class WPForms_Field_Phone extends WPForms_Field {
 		$name = ! empty( $form_data['fields'][ $field_id ]['label'] ) ? $form_data['fields'][ $field_id ]['label'] : '';
 
 		// Set final field details.
-		wpforms()->process->fields[ $field_id ] = [
+		wpforms()->process->fields[ $field_id ] = array(
 			'name'  => sanitize_text_field( $name ),
 			'value' => $this->sanitize_value( $field_submit ),
 			'id'    => absint( $field_id ),
 			'type'  => $this->type,
-		];
+		);
 	}
 
 	/**

@@ -4,6 +4,7 @@ namespace WPForms\Pro\Integrations\LiteConnect;
 
 use WPForms\Tasks\Meta;
 use WPForms\Pro\Admin\DashboardWidget;
+use WPForms\Pro\Admin\Entries\DefaultScreen;
 
 /**
  * Class ImportEntriesTask.
@@ -59,7 +60,7 @@ class ImportEntriesTask {
 			->once( time() + 15 )
 			->register();
 
-		if ( $action_id === null ) {
+		if ( is_null( $action_id ) ) {
 			wpforms_log(
 				'Lite Connect: error creating the AS task',
 				[
@@ -101,6 +102,7 @@ class ImportEntriesTask {
 
 		// Clear Dashboard Widget And Entries Default screen cache.
 		DashboardWidget::clear_widget_cache();
+		DefaultScreen::clear_widget_cache();
 
 		// Recreate task if the import fail for any reasons.
 		if ( $import === false ) {

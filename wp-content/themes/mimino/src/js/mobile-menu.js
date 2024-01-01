@@ -9,8 +9,3 @@ function onClick() {
   button.classList.toggle("active");
   body.classList.toggle("modal-open");
 }
-
-let choices = ["mac", "roll", "kfc", "pizza", "galuhi"];
-let randomIndex = Math.floor(Math.random() * choices.length);
-let choice = choices[randomIndex];
-console.log(choice);

@@ -7,6 +7,11 @@
  * @package Mimino
  */
 
+if (!defined('_S_VERSION')) {
+	define('_S_VERSION', '1.0.5');
+}
+
+
 function mimino_setup()
 {
 	/*
@@ -56,54 +61,43 @@ add_action('after_setup_theme', 'mimino_setup');
 function mimino_scripts()
 {
 	//Подключение стилей
-	wp_enqueue_style('mimino-styles', get_template_directory_uri() . '/dist/main.css', array(), "_S_VERSION");
-	wp_enqueue_script('mimino-main-js', get_template_directory_uri() . '/dist/main.js', array(), "_S_VERSION");
+	wp_enqueue_style('slider-jquery', '//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css', array(), _S_VERSION);
+	wp_enqueue_style('mimino-styles', get_template_directory_uri() . '/dist/main.css', array(), _S_VERSION);
+	wp_enqueue_style('mimino-slick-styles', '//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css', array(), _S_VERSION);
+	wp_enqueue_style('mimino-slick-theme-styles', '//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css', array(), _S_VERSION);
 
-	//Подключение скриптов, файлов для работы слайдеров
+	//Подключение скриптов
+	wp_enqueue_script("jquery");
+	wp_enqueue_script('mimino-main-js', get_template_directory_uri() . '/dist/main.js', array(), _S_VERSION);
+	wp_enqueue_script('slider-jquery-ui', 'https://code.jquery.com/ui/1.13.2/jquery-ui.js', array(), _S_VERSION);
+	wp_enqueue_script('slider-jquery1', "//code.jquery.com/jquery-1.11.0.min.js", array('jquery'), _S_VERSION, true);
+	wp_enqueue_script('slider-jquery2', "//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js", array('jquery'), _S_VERSION, true);
+	wp_enqueue_script('mimino-slider', get_template_directory_uri() . '/src/js/slider.js', array('jquery'), _S_VERSION, true);
 
-
-	wp_enqueue_style('mimino-slick', '//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css', array(), "_S_VERSION");
-
-	wp_enqueue_style('mimino-slick-theme', '//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css', array(), "_S_VERSION");
-
-
-	wp_enqueue_script('jquery1', "//code.jquery.com/jquery-1.11.0.min.js", array('jquery'), "_S_VERSION", true);
-
-	wp_enqueue_script('jquery2', "//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js", array('jquery'), "_S_VERSION", true);
-
-	wp_enqueue_script('slick-min', "//code.jquery.com/jquery-migrate-1.2.1.min.js", array('jquery'), "_S_VERSION", true);
-
-
-
-	wp_enqueue_script('mimino-script-restaurant', get_template_directory_uri() . '/src/js/slider-restaurant.js', array('jquery'), "_S_VERSION", true);
-
-	wp_enqueue_script('mimino-script-restaurant-menu', get_template_directory_uri() . '/src/js/slider-restaurant-menu.js', array('jquery'), "_S_VERSION", true);
-
-	wp_enqueue_script('mimino-slider', get_template_directory_uri() . '/src/js/slider.js', array('jquery'), "_S_VERSION", true);
-
-	wp_enqueue_script('mimino-slider-hotel', get_template_directory_uri() . '/src/js/slider-hotel.js', array('jquery'), "_S_VERSION", true);
-
-	wp_enqueue_script('mimino-slider-blog', get_template_directory_uri() . '/src/js/blog-slider.js', array('jquery'), "_S_VERSION", true);
 
 	//Подключение хедер-скролл
-	wp_enqueue_script('scroll-header', get_template_directory_uri() . '/src/js/scroll-header-btn-top.js', array(), "_S_VERSION", true);
+	wp_enqueue_script('scroll-header', get_template_directory_uri() . '/src/js/scroll-header-btn-top.js', array(), _S_VERSION, true);
 
 	// Подключение модалок, паттернов для них
 
 
-	wp_enqueue_script('modal', get_template_directory_uri() . '/src/js/modal.js', array(), "_S_VERSION", true);
+	wp_enqueue_script('modal', get_template_directory_uri() . '/src/js/modal.js', array(), _S_VERSION, true);
 
-
-	wp_enqueue_script('modal-menu-pattern', get_template_directory_uri() . '/src/js/data-menu.js', array(), "_S_VERSION", true);
 
 
 	wp_enqueue_script('modal-pattern',
-		get_template_directory_uri() . '/src/js/imask.js', array(), "_S_VERSION", true);
+		get_template_directory_uri() . '/src/js/imask.js', array(), _S_VERSION, true);
+
 
 	//Подключение мобильного меню
 
 	wp_enqueue_script('modal-mobile-menu',
-		get_template_directory_uri() . '/src/js/mobile-menu.js', array(), "_S_VERSION", true);
+		get_template_directory_uri() . '/src/js/mobile-menu.js', array(), _S_VERSION, true);
+
+
+
+
+	wp_enqueue_script('calendar-desk', get_template_directory_uri() . '/src/js/calendar.js', array(), _S_VERSION, true);
 
 
 }
@@ -190,3 +184,8 @@ function fix_svg()
           </style>';
 }
 add_action('admin_head', 'fix_svg');
+
+
+
+//Подключение календаря для модалки
+

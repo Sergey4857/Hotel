@@ -24,25 +24,27 @@ window.WPFormsPasswordField = window.WPFormsPasswordField || ( function( documen
 		 */
 		passwordStrength: function( value, element ) {
 
-			const $input = $( element );
-			const $field = $input.closest( '.wpforms-field' );
-			let $strengthResult = $field.find( '.wpforms-pass-strength-result' );
+			var $strengthResult = $( element ).parent().find( '.wpforms-pass-strength-result' );
 
 			if ( ! $strengthResult.length ) {
 				$strengthResult = $( '<div class="wpforms-pass-strength-result"></div>' );
-				$strengthResult.css( 'max-width', $input.css( 'max-width' ) );
+
+				$strengthResult.css( 'max-width', $( element ).css( 'max-width' ) );
+
+				if ( ! $( element ).parent().find( '#' + $( element ).attr( 'id' ) + '-error' ).length ) {
+					$( '<label id="' + $( element ).attr( 'id' ) + '-error" class="wpforms-error" for="' + $( element ).attr( 'id' ) + '"></label>' ).insertAfter( $( element ) );
+				}
 			}
 
 			$strengthResult.removeClass( 'short bad good strong empty' );
 
 			if ( ! value || value.trim() === '' ) {
+				$strengthResult.addClass( 'empty' ).html( '&nbsp;' );
 				$strengthResult.remove();
-				$input.removeClass( 'wpforms-error-pass-strength' );
-
 				return 0;
 			}
 
-			const disallowedList = Object.prototype.hasOwnProperty.call( wp.passwordStrength, 'userInputDisallowedList' ) ?
+			var disallowedList = Object.prototype.hasOwnProperty.call( wp.passwordStrength, 'userInputDisallowedList' ) ?
 				wp.passwordStrength.userInputDisallowedList() :
 				wp.passwordStrength.userInputBlacklist();
 
@@ -50,8 +52,7 @@ window.WPFormsPasswordField = window.WPFormsPasswordField || ( function( documen
 
 			$strengthResult = app.updateStrengthResultEl( $strengthResult, strength );
 
-			$strengthResult.insertAfter( $input );
-			$input.addClass( 'wpforms-error-pass-strength' );
+			$strengthResult.insertAfter( $( element ) );
 
 			return strength;
 		},

@@ -112,18 +112,18 @@ class WPForms_Admin_Editor {
 						printf(
 							wp_kses( /* translators: %s - WPForms documentation URL. */
 								__( 'Heads up! Don\'t forget to test your form. <a href="%s" target="_blank" rel="noopener noreferrer">Check out our complete guide</a>!', 'wpforms-lite' ),
-								[
-									'a' => [
-										'href'   => [],
-										'rel'    => [],
-										'target' => [],
-									],
-								]
+								array(
+									'a' => array(
+										'href'   => array(),
+										'rel'    => array(),
+										'target' => array(),
+									),
+								)
 							),
 							'https://wpforms.com/docs/how-to-properly-test-your-wordpress-forms-before-launching-checklist/'
 						);
 						echo '</p>';
-						$args  = apply_filters( 'wpforms_modal_select', [] );
+						$args  = apply_filters( 'wpforms_modal_select', array() );
 						$forms = wpforms()->form->get( '', $args );
 						if ( ! empty( $forms ) ) {
 							printf( '<p><label for="wpforms-modal-select-form">%s</label></p>', esc_html__( 'Select a form below to insert', 'wpforms-lite' ) );
@@ -140,11 +140,11 @@ class WPForms_Admin_Editor {
 								wp_kses(
 									/* translators: %s - WPForms Builder page. */
 									__( 'Whoops, you haven\'t created a form yet. Want to <a href="%s">give it a go</a>?', 'wpforms-lite' ),
-									[
-										'a' => [
-											'href' => [],
-										],
-									]
+									array(
+										'a' => array(
+											'href' => array(),
+										),
+									)
 								),
 								admin_url( 'admin.php?page=wpforms-builder' )
 							);

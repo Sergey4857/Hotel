@@ -192,23 +192,14 @@ var wpf = {
 			// Normal processing, get fields from builder and prime cache.
 			var formData       = wpf.formObject( '#wpforms-field-options' ),
 				fields         = formData.fields,
-				fieldBlockList = [
-					'captcha',
-					'content',
-					'divider',
-					'entry-preview',
-					'html',
-					'internal-information',
-					'layout',
-					'pagebreak',
-				];
+				fieldBlacklist = [ 'entry-preview', 'html', 'content', 'pagebreak', 'internal-information', 'layout' ];
 
 			if ( ! fields ) {
 				return false;
 			}
 
 			for ( var key in fields ) {
-				if ( ! fields[key].type || jQuery.inArray( fields[key].type, fieldBlockList ) > -1 ) {
+				if ( ! fields[key].type || jQuery.inArray( fields[key].type, fieldBlacklist ) > -1 ) {
 					delete fields[key];
 				}
 			}
@@ -781,15 +772,11 @@ var wpf = {
 			string = string.toString();
 		}
 
-		const purifyOptions = {
-			ADD_ATTR: [ 'target' ],
-		};
-
-		if ( typeof allowed !== 'undefined' ) {
-			purifyOptions.ALLOWED_TAGS = allowed;
+		if ( typeof allowed === 'undefined' ) {
+			return purify.sanitize( string );
 		}
 
-		return purify.sanitize( string, purifyOptions ).trim();
+		return purify.sanitize( string, { ALLOWED_TAGS: allowed, ADD_ATTR: [ 'target' ] } ).trim();
 	},
 
 	/**

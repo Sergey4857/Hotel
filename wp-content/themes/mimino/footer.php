@@ -33,8 +33,12 @@
 			</li>
 		</ul>
 
+
+
 	</div>
 </footer>
+
+
 
 <?php get_template_part("modal/modal-bookARoom") ?>
 <?php get_template_part("modal/modal-bookATable") ?>
@@ -42,6 +46,7 @@
 <?php get_template_part("modal/modal-pricesPerRoom") ?>
 
 <?php wp_footer() ?>
+
 
 
 

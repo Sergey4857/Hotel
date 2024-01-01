@@ -15,22 +15,11 @@ class WPForms_Field_Password extends WPForms_Field {
 	public function init() {
 
 		// Define field type information.
-		$this->name     = esc_html__( 'Password', 'wpforms' );
-		$this->keywords = esc_html__( 'user', 'wpforms' );
-		$this->type     = 'password';
-		$this->icon     = 'fa-lock';
-		$this->order    = 130;
-		$this->group    = 'fancy';
-
-		$this->hooks();
-	}
-
-	/**
-	 * Hooks.
-	 *
-	 * @since 1.8.1
-	 */
-	private function hooks() {
+		$this->name  = esc_html__( 'Password', 'wpforms' );
+		$this->type  = 'password';
+		$this->icon  = 'fa-lock';
+		$this->order = 130;
+		$this->group = 'fancy';
 
 		// Define additional field properties.
 		add_filter( 'wpforms_field_properties_password', [ $this, 'field_properties' ], 5, 3 );
@@ -48,9 +37,6 @@ class WPForms_Field_Password extends WPForms_Field {
 		add_action( 'wpforms_frontend_strings', [ $this, 'add_frontend_strings' ] );
 
 		add_action( 'wpforms_pro_fields_entry_preview_get_field_value_password_field', [ $this, 'modify_entry_preview_value' ], 10, 3 );
-
-		// This field requires fieldset+legend instead of the field label.
-		add_filter( "wpforms_frontend_modern_is_field_requires_fieldset_{$this->type}", [ $this, 'is_field_requires_fieldset' ], PHP_INT_MAX, 2 );
 	}
 
 	/**
@@ -65,9 +51,6 @@ class WPForms_Field_Password extends WPForms_Field {
 	 * @return array
 	 */
 	public function field_properties( $properties, $field, $form_data ) {
-
-		// Prevent "spell-jacking" of passwords.
-		$properties['inputs']['primary']['attr']['spellcheck'] = 'false';
 
 		if ( ! empty( $field['password-strength'] ) ) {
 			$properties['inputs']['primary']['data']['rule-password-strength']  = true;
@@ -103,7 +86,6 @@ class WPForms_Field_Password extends WPForms_Field {
 						'name'        => "wpforms[fields][{$field_id}][secondary]",
 						'value'       => '',
 						'placeholder' => ! empty( $field['confirmation_placeholder'] ) ? $field['confirmation_placeholder'] : '',
-						'spellcheck'  => 'false',
 					],
 					'block'    => [
 						'wpforms-field-row-block',
@@ -417,7 +399,7 @@ class WPForms_Field_Password extends WPForms_Field {
 		// Define data.
 		$confirmation = ! empty( $field['confirmation'] );
 		$primary      = $field['properties']['inputs']['primary'];
-		$secondary    = ! empty( $field['properties']['inputs']['secondary'] ) ? $field['properties']['inputs']['secondary'] : [];
+		$secondary    = ! empty( $field['properties']['inputs']['secondary'] ) ? $field['properties']['inputs']['secondary'] : array();
 
 		// Standard password field.
 		if ( ! $confirmation ) {
@@ -542,12 +524,12 @@ class WPForms_Field_Password extends WPForms_Field {
 		$name = ! empty( $form_data['fields'][ $field_id ] ['label'] ) ? $form_data['fields'][ $field_id ]['label'] : '';
 
 		// Set final field details.
-		wpforms()->process->fields[ $field_id ] = [
+		wpforms()->process->fields[ $field_id ] = array(
 			'name'  => sanitize_text_field( $name ),
 			'value' => sanitize_text_field( $value ),
 			'id'    => absint( $field_id ),
 			'type'  => $this->type,
-		];
+		);
 	}
 
 	/**
@@ -686,23 +668,6 @@ class WPForms_Field_Password extends WPForms_Field {
 				empty( $field_submit ) || empty( implode( '', array_values( (array) $field_submit ) ) )
 			)
 			&& empty( $fields[ $field_id ]['required'] ); // If field is not set as required.
-	}
-
-	/**
-	 * Determine if the field requires fieldset instead of the regular field label.
-	 *
-	 * @since 1.8.1
-	 *
-	 * @param bool  $requires_fieldset True if requires fieldset.
-	 * @param array $field             Field data.
-	 *
-	 * @return bool
-	 *
-	 * @noinspection PhpUnusedParameterInspection
-	 */
-	public function is_field_requires_fieldset( $requires_fieldset, $field ) {
-
-		return ! empty( $field['confirmation'] );
 	}
 }
 

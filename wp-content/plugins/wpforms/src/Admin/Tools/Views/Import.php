@@ -6,7 +6,6 @@ use WPForms\Helpers\File;
 use WPForms\Admin\Tools\Importers;
 use WPForms\Admin\Tools\Tools;
 use WPForms_Form_Handler;
-use WPForms\Admin\Notice;
 
 /**
  * Class Import.
@@ -46,47 +45,15 @@ class Import extends View {
 	}
 
 	/**
-	 * Determine whether user has the "unfiltered_html" capability.
-	 *
-	 * By default, the "unfiltered_html" permission is only given to
-	 * Super Admins, Administrators and Editors.
-	 *
-	 * @since 1.7.9
-	 *
-	 * @return bool
-	 */
-	private function check_unfiltered_html_capability() {
-
-		return current_user_can( 'unfiltered_html' );
-	}
-
-	/**
 	 * Init view.
 	 *
 	 * @since 1.6.6
 	 */
 	public function init() {
 
-		// Bail early, in case the current user lacks the `unfiltered_html` capability.
-		if ( ! $this->check_unfiltered_html_capability() ) {
-			$this->error_unfiltered_html_import_message();
-
-			return;
-		}
-
-		$this->hooks();
+		add_action( 'wpforms_tools_init', [ $this, 'import_process' ] );
 
 		$this->importers = ( new Importers() )->get_importers();
-	}
-
-	/**
-	 * Register hooks.
-	 *
-	 * @since 1.7.9
-	 */
-	private function hooks() {
-
-		add_action( 'wpforms_tools_init', [ $this, 'import_process' ] );
 	}
 
 	/**
@@ -108,17 +75,15 @@ class Import extends View {
 	 */
 	public function import_process() {
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if (
-			empty( $_POST['action'] ) ||
-			$_POST['action'] !== 'import_form' ||
+			empty( $_POST['action'] ) || //phpcs:ignore WordPress.Security.NonceVerification
+			$_POST['action'] !== 'import_form' || //phpcs:ignore WordPress.Security.NonceVerification
 			empty( $_FILES['file']['tmp_name'] ) ||
-			! isset( $_POST['submit-import'] ) ||
+			! isset( $_POST['submit-import'] ) || //phpcs:ignore WordPress.Security.NonceVerification
 			! $this->verify_nonce()
 		) {
 			return;
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$this->process();
 	}
@@ -130,13 +95,10 @@ class Import extends View {
 	 */
 	public function display() {
 
-		// Bail early, in case the current user lacks the `unfiltered_html` capability.
-		if ( ! $this->check_unfiltered_html_capability() ) {
-			return;
-		}
-
 		$this->success_import_message();
+
 		$this->wpforms_block();
+
 		$this->other_forms_block();
 	}
 
@@ -147,8 +109,7 @@ class Import extends View {
 	 */
 	private function success_import_message() {
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['wpforms_notice'] ) && $_GET['wpforms_notice'] === 'forms-imported' ) {
+		if ( isset( $_GET['wpforms_notice'] ) && $_GET['wpforms_notice'] === 'forms-imported' ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			?>
 			<div class="updated notice is-dismissible">
 				<p>
@@ -156,7 +117,7 @@ class Import extends View {
 					<?php
 					if ( wpforms_current_user_can( 'view_forms' ) ) {
 						printf(
-							wp_kses( /* translators: %s - forms list page URL. */
+							wp_kses( /* translators: %s - Forms list page URL. */
 								__( 'You can go and <a href="%s">check your forms</a>.', 'wpforms-lite' ),
 								[ 'a' => [ 'href' => [] ] ]
 							),
@@ -168,30 +129,6 @@ class Import extends View {
 			</div>
 			<?php
 		}
-	}
-
-	/**
-	 * Error message for users with no `unfiltered_html` permission.
-	 *
-	 * @since 1.7.9
-	 */
-	private function error_unfiltered_html_import_message() {
-
-		Notice::error(
-			sprintf(
-				wp_kses( /* translators: %s - WPForms contact page URL. */
-					__( 'You can’t import forms because you don’t have unfiltered HTML permissions. Please contact your site administrator or <a href="%s" target="_blank" rel="noopener noreferrer">reach out to our support team</a>.', 'wpforms-lite' ),
-					[
-						'a' => [
-							'href'   => [],
-							'target' => [],
-							'rel'    => [],
-						],
-					]
-				),
-				'https://wpforms.com/contact/'
-			)
-		);
 	}
 
 	/**
@@ -248,7 +185,7 @@ class Import extends View {
 				<?php } else { ?>
 					<form action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
 						<span class="choicesjs-select-wrap">
-							<select class="choicesjs-select" name="provider" data-search="<?php echo esc_attr( wpforms_choices_js_is_search_enabled( $this->importers ) ); ?>" required>
+							<select class="choicesjs-select" name="provider" required>
 								<option value=""><?php esc_html_e( 'Select previous contact form plugin...', 'wpforms-lite' ); ?></option>
 								<?php
 								foreach ( $this->importers as $importer ) {
@@ -264,7 +201,7 @@ class Import extends View {
 										esc_attr( $importer['slug'] ),
 										! empty( $status ) ? 'disabled' : '',
 										esc_html( $importer['name'] ),
-										! empty( $status ) ? '(' . esc_html( $status ) . ')' : '' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+										! empty( $status ) ? '(' . esc_html( $status ) . ')' : '' //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 									);
 								}
 								?>
@@ -309,8 +246,7 @@ class Import extends View {
 			);
 		}
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- wp_unslash() breaks upload on Windows.
-		$tmp_name = isset( $_FILES['file']['tmp_name'] ) ? sanitize_text_field( $_FILES['file']['tmp_name'] ) : '';
+		$tmp_name = isset( $_FILES['file']['tmp_name'] ) ? sanitize_text_field( $_FILES['file']['tmp_name'] ) : ''; //phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- wp_unslash() breaks upload on Windows.
 		$forms    = json_decode( File::remove_utf8_bom( file_get_contents( $tmp_name ) ), true );
 
 		if ( empty( $forms ) || ! is_array( $forms ) ) {

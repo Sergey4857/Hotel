@@ -8,8 +8,7 @@
   padding-right: 24px;
   padding-bottom: 40px;
   padding-left: 24px;
-  width: 335px;
-  height: 528px;
+  max-width: 335px;
   transform: translate(-50%, -50%) scaleY(1);
   opacity: 1;
   background-color: var(--background-color-dark);
@@ -42,7 +41,6 @@
 @media screen and (min-width: 768px) {
   .book-table-modal {
     min-width: 628px;
-    max-height: 476px;
     padding-bottom: 60px;
   }
 

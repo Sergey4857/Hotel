@@ -71,12 +71,10 @@ class WPForms_Entries_Export {
 	 * All fields.
 	 *
 	 * @since 1.5.5
-	 *
 	 * @return array
 	 */
 	public function all_fields() {
-
-		return [
+		return array(
 			'text',
 			'textarea',
 			'number-slider',
@@ -102,7 +100,7 @@ class WPForms_Entries_Export {
 			'payment-total',
 			'signature',
 			'net_promoter_score',
-		];
+		);
 	}
 
 	/**
@@ -116,7 +114,7 @@ class WPForms_Entries_Export {
 
 		$fields = (array) apply_filters_deprecated(
 			'wpforms_export_fields_allowed',
-			[ $this->all_fields() ],
+			array( $this->all_fields() ),
 			'1.5.5 of the WPForms plugin',
 			'wpforms_pro_admin_entries_export_configuration'
 		);
@@ -183,7 +181,7 @@ class WPForms_Entries_Export {
 	 */
 	public function get_csv_cols() {
 
-		$cols = [];
+		$cols = array();
 
 		// If we are exporting a single entry we do not need to reference the
 		// form and can export by looking at the field contained within the
@@ -195,10 +193,10 @@ class WPForms_Entries_Export {
 		} else {
 			$this->form_data = wpforms()->form->get(
 				$this->form_id,
-				[
+				array(
 					'content_only' => true,
 					'cap'          => 'view_entries_form_single',
-				]
+				)
 			);
 
 			$this->fields = $this->form_data['fields'];
@@ -248,7 +246,7 @@ class WPForms_Entries_Export {
 	public function get_data() {
 
 		$allowed = $this->allowed_fields();
-		$data    = [];
+		$data    = array();
 
 		if ( $this->is_single_entry() ) :
 
@@ -267,11 +265,11 @@ class WPForms_Entries_Export {
 		else :
 
 			// All or multiple entry export.
-			$args        = [
+			$args        = array(
 				'number'  => - 1,
 				//'entry_id' => is_array( $this->entry_type ) ? $this->entry_type : '', @todo
 				'form_id' => $this->form_id,
-			];
+			);
 			$entries     = wpforms()->entry->get_entries( $args );
 			$form_fields = $this->form_data['fields'];
 
@@ -312,7 +310,7 @@ class WPForms_Entries_Export {
 
 		$separator = apply_filters_deprecated(
 			'wpforms_csv_export_seperator',
-			[ ',' ],
+			array( ',' ),
 			'1.4.1 of the WPForms plugin',
 			'wpforms_csv_export_separator'
 		);
@@ -330,7 +328,7 @@ class WPForms_Entries_Export {
 		$sep  = $this->get_csv_export_separator();
 		$data = $this->get_data();
 		$cols = $this->get_csv_cols();
-		$rows = [];
+		$rows = array();
 		$i    = 0;
 
 		// First, compile each row.
@@ -365,9 +363,9 @@ class WPForms_Entries_Export {
 			wp_die(
 				esc_html__( 'You do not have permission to export entries.', 'wpforms' ),
 				esc_html__( 'Error', 'wpforms' ),
-				[
+				array(
 					'response' => 403,
-				]
+				)
 			);
 		}
 

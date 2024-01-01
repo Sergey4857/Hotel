@@ -177,10 +177,8 @@ class Chain {
 
 		if ( in_array( $name, $this->allowed_methods(), true ) ) {
 
-			$params = $params === null ? [] : $params;
-
+			$params = null === $params ? array() : $params;
 			array_unshift( $params, $this->value );
-
 			$this->value = call_user_func_array( $name, array_values( $params ) );
 
 			return $this;

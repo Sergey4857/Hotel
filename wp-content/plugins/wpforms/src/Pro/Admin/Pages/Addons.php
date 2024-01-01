@@ -215,7 +215,7 @@ class Addons {
      */
 	public function notices() {
 
-		$errors = wpforms()->get( 'license' )->get_errors();
+		$errors = wpforms()->license->get_errors();
 
 		if ( empty( $this->addons ) ) {
 			\WPForms\Admin\Notice::error( esc_html__( 'There was an issue retrieving Addons for this site. Please click on the button above to refresh.', 'wpforms' ) );
@@ -310,7 +310,7 @@ class Addons {
 							],
 						]
 					),
-					esc_url( wpforms_utm_link( 'https://wpforms.com/account/', 'addons', 'Upgrade For More Addons' ) )
+					'https://wpforms.com/account/'
 				) .
 			'</p>';
 		echo '</div>';

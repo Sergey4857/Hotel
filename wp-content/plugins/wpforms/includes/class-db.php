@@ -1,9 +1,5 @@
 <?php
 
-// phpcs:disable WPForms.Comments.PHPDocHooks.RequiredHookDocumentation, WPForms.PHP.ValidateHooks.InvalidHookName
-// phpcs:ignore Generic.Commenting.DocComment.MissingShort
-/** @noinspection AutoloadingIssuesInspection */
-
 /**
  * DB class.
  *
@@ -15,17 +11,6 @@
  * @since 1.1.6
  */
 abstract class WPForms_DB {
-
-	/**
-	 * Maximum length of index key.
-	 *
-	 * Indexes have a maximum size of 767 bytes. Historically, we haven't needed to be concerned about that.
-	 * As of WP 4.2, however, WP moved to utf8mb4, which uses 4 bytes per character. This means that an index which
-	 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
-	 *
-	 * @since 1.8.2
-	 */
-	const MAX_INDEX_LENGTH = 191;
 
 	/**
 	 * Database table name.
@@ -65,7 +50,7 @@ abstract class WPForms_DB {
 
 	/**
 	 * Retrieve the list of columns for the database table.
-	 * Subclasses should define an array of columns here.
+	 * Sub-classes should define an array of columns here.
 	 *
 	 * @since 1.1.6
 	 *
@@ -78,7 +63,7 @@ abstract class WPForms_DB {
 
 	/**
 	 * Retrieve column defaults.
-	 * Subclasses can define default for any/all columns defined in the get_columns() method.
+	 * Sub-classes can define default for any/all of columns defined in the get_columns() method.
 	 *
 	 * @since 1.1.6
 	 *
@@ -127,7 +112,7 @@ abstract class WPForms_DB {
 
 		if (
 			empty( $value ) ||
-			! array_key_exists( $column, $this->get_columns() )
+		    ! array_key_exists( $column, $this->get_columns() )
 		) {
 			return null;
 		}
@@ -150,7 +135,6 @@ abstract class WPForms_DB {
 	 * @param int|string $row_id Row ID.
 	 *
 	 * @return string|null Database query result (as string), or null on failure.
-	 * @noinspection PhpUnused
 	 */
 	public function get_column( $column, $row_id ) {
 
@@ -179,7 +163,6 @@ abstract class WPForms_DB {
 	 * @param string $column_value Value to match to the column in the WHERE clause.
 	 *
 	 * @return string|null Database query result (as string), or null on failure.
-	 * @noinspection PhpUnused
 	 */
 	public function get_column_by( $column, $column_where, $column_value ) {
 
@@ -219,7 +202,7 @@ abstract class WPForms_DB {
 		global $wpdb;
 
 		// Set default values.
-		$data = wp_parse_args( $data, $this->get_column_defaults() );
+		$data = (array) wp_parse_args( $data, $this->get_column_defaults() );
 
 		do_action( 'wpforms_pre_insert_' . $type, $data );
 
@@ -335,15 +318,8 @@ abstract class WPForms_DB {
 		do_action( 'wpforms_pre_delete', $row_id );
 		do_action( 'wpforms_pre_delete_' . $this->type, $row_id );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		$result = $wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM $this->table_name WHERE $this->primary_key = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$row_id
-			)
-		);
-
-		if ( $result === false ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		if ( $wpdb->query( $wpdb->prepare( "DELETE FROM $this->table_name WHERE $this->primary_key = %d", $row_id ) ) === false ) {
 			return false;
 		}
 
@@ -378,15 +354,8 @@ abstract class WPForms_DB {
 		do_action( 'wpforms_pre_delete', $column_value );
 		do_action( 'wpforms_pre_delete_' . $this->type, $column_value );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		$result = $wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM $this->table_name WHERE $column = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$column_value
-			)
-		);
-
-		if ( $result === false ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		if ( $wpdb->query( $wpdb->prepare( "DELETE FROM $this->table_name WHERE $column = %s", $column_value ) ) === false ) {
 			return false;
 		}
 
@@ -418,7 +387,7 @@ abstract class WPForms_DB {
 			return false;
 		}
 
-		$values = (array) $column_values;
+		$values = is_array( $column_values ) ? $column_values : [ $column_values ];
 
 		foreach ( $values as $key => $value ) {
 			// Check if a string contains an integer and sanitize accordingly.

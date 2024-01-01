@@ -9,8 +9,18 @@
     <h2 class="modal-title">
       book a <span class="current-font-style">table</span>
     </h2>
-    <form class="book-a-table-modal-form">
-      <ul class="book-a-table-modal-list">
+    <div class="book-a-table-modal-form">
+
+      <?php echo do_shortcode('[contact-form-7 id="df17ac8" title="Book a table"]') ?>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- <ul class="book-a-table-modal-list">
         <li class="book-a-table-modal-item">
           <label class="book-a-table-modal-label">
             <input class="book-a-table-modal-input" type="text" name="user_name" autocomplete="off"
@@ -31,35 +41,30 @@
                 <option value="6">6</option>
                 <option value="7">7</option>
               </select>
-              <svg class="modal-select-icon" width="20" height="20">
-                <use href="./img/icons/sprite.svg#btn-select"></use>
-              </svg>
-            </span>
-          </label>
-        </li>
-        <li class="book-a-table-modal-item">
-          <label class="book-a-table-modal-label">
-            <span class="modal-icon-wrap">
-              <input class="book-room-modal-input fix-margin my-date-input" type="text" name="booking-date"
-                autocomplete="off" placeholder="TODAY"
-                pattern="(0[1-9]|[12][0-9]|3[01])[- ..](0[1-9]|1[012])[- ..](19|20)\d\d" />
-              <svg class="modal-select-icon" width="20" height="20">
-                <use href="./img/icons/sprite.svg#btn-select"></use>
-              </svg>
-            </span>
-            What date to book?
-          </label>
-        </li>
-        <li class="book-a-table-modal-item">
-          <label class="book-a-table-modal-label">
-            <input class="book-a-table-modal-input tel-input" type="tel" name="user_phone" autocomplete="off"
-              required />Phone number
-          </label>
-        </li>
-      </ul>
-      <div class="modal-button-wrap">
-        <button type="submit" class="modal-button">MAKE A RESERVATION</button>
-      </div>
-    </form>
-  </div>
-</div>
+              <img class="modal-select-icon"
+                src="<?php echo get_template_directory_uri() . "../src/icons/arrow-down.svg" ?>" alt="close" />
+              </span>
+            </label>
+          </li>
+          <li class="book-a-table-modal-item">
+            <label class="book-a-table-modal-label">
+              <span class="modal-icon-wrap">
+                <input class="book-room-modal-input fix-margin my-date-input datepicker" type="text" name="booking-date"
+                  autocomplete="off" placeholder="TODAY"
+                  pattern="(0[1-9]|[12][0-9]|3[01])[- ..](0[1-9]|1[012])[- ..](19|20)\d\d" />
+                <img class="modal-select-icon"
+                  src="<?php echo get_template_directory_uri() . "/src/icons/arrow-down.svg" ?>" alt="close" />
+              </span>
+              What date to book?
+            </label>
+          </li>
+          <li class="book-a-table-modal-item">
+            <label class="book-a-table-modal-label">
+              <input class="book-a-table-modal-input tel-input" type="tel" name="user_phone" autocomplete="off"
+                required />Phone number
+            </label>
+          </li>
+        </ul>
+        <div class="modal-button-wrap">
+          <button type="submit" class="modal-button">MAKE A RESERVATION</button>
+        </div> -->

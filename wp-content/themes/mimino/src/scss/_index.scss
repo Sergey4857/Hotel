@@ -10,6 +10,7 @@
 @use "./common/header.scss";
 @use "./common/footer.scss";
 @use "./common/fonts.scss";
+@use "./common/modal-datepicker.scss";
 
 /* components */
 @use "./components/button-modal.scss";
@@ -26,6 +27,7 @@
 @use "./modal-windows/book-a-table.scss";
 @use "./modal-windows/prices-per-room.scss";
 @use "./modal-windows/tecnical-works-modal.scss";
+@use "./modal-windows/common-modal.scss";
 
 /* mobile-menu */
 @use "./modal-windows/mobile-menu.scss";

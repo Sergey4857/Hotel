@@ -49,6 +49,7 @@ class WPForms_Pro {
 		require_once WPFORMS_PLUGIN_DIR . 'pro/includes/class-conditional-logic-core.php';
 		require_once WPFORMS_PLUGIN_DIR . 'pro/includes/class-conditional-logic-fields.php';
 		require_once WPFORMS_PLUGIN_DIR . 'pro/includes/payments/class-payment.php';
+		require_once WPFORMS_PLUGIN_DIR . 'pro/includes/payments/functions.php';
 
 		if ( is_admin() || wp_doing_cron() || wpforms_doing_wp_cli() ) {
 			require_once WPFORMS_PLUGIN_DIR . 'pro/includes/admin/ajax-actions.php';
@@ -81,7 +82,7 @@ class WPForms_Pro {
 		add_action( 'wpforms_loaded', [ $this, 'objects' ], 1 );
 		add_action( 'wpforms_loaded', [ $this, 'updater' ], 30 );
 		add_action( 'wpforms_install', [ $this, 'install' ], 10 );
-		add_filter( 'wpforms_settings_license_output', [ $this, 'settings_license_callback' ] );
+		add_filter( 'wpforms_settings_tabs', [ $this, 'register_settings_tabs' ], 5, 1 );
 		add_filter( 'wpforms_settings_defaults', [ $this, 'register_settings_fields' ], 5, 1 );
 		add_action( 'wpforms_settings_init', [ $this, 'reinstall_custom_tables' ] );
 		add_filter( 'wpforms_update_settings', [ $this, 'maybe_unset_gdpr_sub_settings' ] );
@@ -135,7 +136,7 @@ class WPForms_Pro {
 
 		// Go ahead and initialize the updater.
 		new \WPForms_Updater(
-			[
+			array(
 				'plugin_name' => 'WPForms',
 				'plugin_slug' => 'wpforms',
 				'plugin_path' => plugin_basename( WPFORMS_PLUGIN_FILE ),
@@ -143,7 +144,7 @@ class WPForms_Pro {
 				'remote_url'  => WPFORMS_UPDATER_API,
 				'version'     => WPFORMS_VERSION,
 				'key'         => $key,
-			]
+			)
 		);
 
 		// Fire a hook for Addons to register their updater since we know the key is present.
@@ -206,7 +207,7 @@ class WPForms_Pro {
 		include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 		require_once ABSPATH . 'wp-admin/includes/class-automatic-upgrader-skin.php';
 
-		$locales = array_unique( [ get_locale(), get_user_locale() ] );
+		$locales = array_unique( array( get_locale(), get_user_locale() ) );
 
 		if ( 1 === count( $locales ) && 'en_US' === $locales[0] ) {
 			return;
@@ -215,14 +216,14 @@ class WPForms_Pro {
 		$to_update = [];
 
 		foreach ( $locales as $locale ) {
-			$to_update[] = (object) [
+			$to_update[] = (object) array(
 				'type'       => 'plugin',
 				'slug'       => 'wpforms-lite',
 				'language'   => $locale,
 				'version'    => WPFORMS_VERSION,
 				'package'    => 'https://downloads.wordpress.org/translation/plugin/wpforms-lite/' . WPFORMS_VERSION . '/' . $locale . '.zip',
 				'autoupdate' => true,
-			];
+			);
 		}
 
 		$upgrader = new Language_Pack_Upgrader( new Automatic_Upgrader_Skin() );
@@ -309,74 +310,28 @@ class WPForms_Pro {
 	}
 
 	/**
-	 * Override the Settings license field callback.
+	 * Register Pro settings tabs.
 	 *
-	 * @since 1.7.9
+	 * @since 1.3.9
 	 *
-	 * @param string $html HTML markup for the "Lite" plugin’s license settings section.
+	 * @param array $tabs Admin area tabs list.
 	 *
-	 * @return string
+	 * @return array
 	 */
-	public function settings_license_callback( $html ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity
+	public function register_settings_tabs( $tabs ) {
 
-		$license      = wpforms()->get( 'license' );
-		$key          = $license->get();
-		$type         = $license->type();
-		$is_constant  = $license->get_key_location() === 'constant';
-		$has_key      = ! empty( $key );
-		$has_errors   = $has_key && $license->get_errors();
-		$is_valid_key = $has_key && ! empty( $type ) && ! $has_errors;
-		$no_refresh   = ! $has_key || $license->is_invalid() || $license->is_disabled();
+		// Add Payments tab.
+		$payments = array(
+			'payments' => array(
+				'name'   => esc_html__( 'Payments', 'wpforms' ),
+				'form'   => true,
+				'submit' => esc_html__( 'Save Settings', 'wpforms' ),
+			),
+		);
 
-		// Block ui when license key used as a constant.
-		$class  = $is_constant ? 'wpforms-setting-license-block-ui' : '';
-		$output = '<span class="wpforms-setting-license-wrapper ' . $class . '">'; // Reset the original output from the Lite version.
+		$tabs = wpforms_array_insert( $tabs, $payments, 'validation' );
 
-		$class   = $is_valid_key ? 'wpforms-setting-license-is-valid' : 'wpforms-setting-license-is-invalid';
-        $class   = $has_key ? $class : '';
-		$output .= '<input type="password" spellcheck="false" id="wpforms-setting-license-key" class="' . $class . '" value="' . esc_attr( $key ) . '"' . disabled( true, $has_key, false ) . '>';
-		$output .= '<i></i>';
-		$output .= '</span>';
-
-		// Offer interactions when license is not defined as a constant.
-		if ( ! $is_constant ) {
-			$class   = $has_key ? 'wpforms-hide' : '';
-			$output .= '<button id="wpforms-setting-license-key-verify" class="wpforms-btn wpforms-btn-md wpforms-btn-orange ' . $class . '">' . esc_html__( 'Verify Key', 'wpforms' ) . '</button>';
-		}
-
-		// Skip, in case license did not expire.
-		if ( $has_errors && $license->is_expired() ) {
-			$renew_url = wpforms_utm_link( 'https://wpforms.com/account/licenses/', 'settings-license', 'Renew License CTA' );
-			$output   .= '<a href="' . esc_url( $renew_url ) . '" id="wpforms-setting-license-key-renew" class="wpforms-btn wpforms-btn-md wpforms-btn-red wpforms-license-key-deactivate-remove" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Renew License', 'wpforms' ) . '</a>';
-		}
-
-		// Offer interactions when license is not defined as a constant.
-		if ( ! $is_constant ) {
-			$class   = ! $has_key ? 'wpforms-hide' : '';
-			$output .= '<button id="wpforms-setting-license-key-deactivate" class="wpforms-btn wpforms-btn-md wpforms-btn-light-grey ' . $class . '">' . esc_html__( 'Remove Key', 'wpforms' ) . '</button>';
-		}
-
-		$class   = $is_valid_key ? 'wpforms-hide' : '';
-		$output .= '<p id="wpforms-setting-license-key-info-message" class="' . $class . '">' . $license->get_info_message_escaped() . '</p>';
-
-		// If we have previously looked up the license type, display it.
-		$class   = ! $is_valid_key ? 'wpforms-hide' : '';
-		$output .= '<p class="type ' . $class . '">' .
-					sprintf( /* translators: $s - license type. */
-						esc_html__( 'Your license key level is %s.', 'wpforms' ),
-						'<strong>' . esc_html( ucwords( $type ) ) . '</strong>'
-					) .
-					'</p>';
-		$class   = $no_refresh ? 'wpforms-hide' : '';
-		$output .= '<p class="desc ' . $class . '">' .
-					sprintf( /* translators: %s - refresh link. */
-						esc_html__( 'If your license has been upgraded or is incorrect, then please %1$sforce a refresh%2$s.', 'wpforms' ),
-						'<a href="#" id="wpforms-setting-license-key-refresh">',
-						'</a>'
-					)
-					. '</p>';
-
-		return $output;
+		return $tabs;
 	}
 
 	/**
@@ -396,7 +351,7 @@ class WPForms_Pro {
 		wp_enqueue_style(
 			'wpforms-pro-admin',
 			WPFORMS_PLUGIN_URL . "assets/pro/css/admin{$min}.css",
-			[],
+			array(),
 			WPFORMS_VERSION
 		);
 	}
@@ -411,6 +366,14 @@ class WPForms_Pro {
 	 * @return array
 	 */
 	public function register_settings_fields( $settings ) {
+
+		$currencies      = wpforms_get_currencies();
+		$currency_option = [];
+
+		// Format currencies for select element.
+		foreach ( $currencies as $code => $currency ) {
+			$currency_option[ $code ] = sprintf( '%s (%s %s)', $currency['name'], $code, $currency['symbol'] );
+		}
 
 		// Validation settings for fields only available in Pro.
 		$settings['validation']['validation-url']              = [
@@ -491,6 +454,24 @@ class WPForms_Pro {
 			'name'    => esc_html__( 'Password Strength', 'wpforms' ),
 			'type'    => 'text',
 			'default' => esc_html__( 'A stronger password is required. Consider using upper and lower case letters, numbers, and symbols.', 'wpforms' ),
+		];
+
+		// Payment settings.
+		$settings['payments']['payments-heading'] = [
+			'id'       => 'payments-heading',
+			'content'  => '<h4>' . esc_html__( 'Payments', 'wpforms' ) . '</h4>',
+			'type'     => 'content',
+			'no_label' => true,
+			'class'    => [ 'section-heading', 'no-desc' ],
+		];
+		$settings['payments']['currency']         = [
+			'id'        => 'currency',
+			'name'      => esc_html__( 'Currency', 'wpforms' ),
+			'type'      => 'select',
+			'choicesjs' => true,
+			'search'    => true,
+			'default'   => 'USD',
+			'options'   => $currency_option,
 		];
 
 		// Additional GDPR related options.
@@ -623,13 +604,9 @@ class WPForms_Pro {
 	public function form_table_columns( $columns ) {
 
 		if ( ! wpforms_current_user_can( 'view_entries' ) ) {
-			unset( $columns['entries'] );
-
 			return $columns;
 		}
 
-		// The label for the "Entries" column is already defined in the "Lite" version.
-		// The primary reason for leaving this here is to continue loading the translation equivalent associated with the PRO version text-domain.
 		$columns['entries'] = esc_html__( 'Entries', 'wpforms' );
 
 		return $columns;
@@ -653,28 +630,23 @@ class WPForms_Pro {
 		}
 
 		if ( ! wpforms_current_user_can( 'view_entries_form_single', $form->ID ) ) {
-			return '&mdash;';
+			return '-';
 		}
 
-		$form_data = wpforms_decode( $form->post_content );
-		$count     = wpforms()->get( 'entry' )->get_entries(
-			[
+		$count = wpforms()->entry->get_entries(
+			array(
 				'form_id' => $form->ID,
-			],
+			),
 			true
 		);
-
-		if ( $count === 0 && ! empty( $form_data['settings']['disable_entries'] ) ) {
-			return '&mdash;';
-		}
 
 		$value = sprintf(
 			'<a href="%s">%d</a>',
 			add_query_arg(
-				[
+				array(
 					'view'    => 'list',
 					'form_id' => $form->ID,
-				],
+				),
 				admin_url( 'admin.php?page=wpforms-entries' )
 			),
 			$count
@@ -702,12 +674,8 @@ class WPForms_Pro {
 		if ( empty( $notifications ) ) {
 			$next_id = 2;
 
-			$notifications[1]['subject']        = ! empty( $form_settings['notification_subject'] ) ?
-				$form_settings['notification_subject'] :
-				sprintf( /* translators: %s - form name. */
-					esc_html__( 'New %s Entry', 'wpforms' ),
-					$settings->form->post_title
-				);
+			/* translators: %s - form name. */
+			$notifications[1]['subject']        = ! empty( $form_settings['notification_subject'] ) ? $form_settings['notification_subject'] : sprintf( esc_html__( 'New %s Entry', 'wpforms' ), $settings->form->post_title );
 			$notifications[1]['email']          = ! empty( $form_settings['notification_email'] ) ? $form_settings['notification_email'] : '{admin_email}';
 			$notifications[1]['sender_name']    = ! empty( $form_settings['notification_fromname'] ) ? $form_settings['notification_fromname'] : $from_name;
 			$notifications[1]['sender_address'] = ! empty( $form_settings['notification_fromaddress'] ) ? $form_settings['notification_fromaddress'] : $from_email;
@@ -734,7 +702,7 @@ class WPForms_Pro {
 			echo '<button type="button" class="wpforms-dismiss-button" title="' . esc_attr__( 'Dismiss this message.', 'wpforms' ) . '" data-section="builder-notifications-description"></button>';
 			echo '<p>';
 			printf(
-				wp_kses( /* translators: %s - link to the WPForms.com doc article. */
+				wp_kses( /* translators: %s - Link to the WPForms.com doc article. */
 					__( 'Notifications are emails sent when a form is submitted. By default, these emails include entry details. For setup and customization options, including a video overview, please <a href="%s" target="_blank" rel="noopener noreferrer">see our tutorial</a>.', 'wpforms' ),
 					[
 						'a' => [
@@ -749,7 +717,7 @@ class WPForms_Pro {
 			echo '</p>';
 			echo '<p>';
 			printf(
-				wp_kses( /* translators: 1$s, %2$s - links to the WPForms.com doc articles. */
+				wp_kses( /* translators: 1$s, %2$s - Links to the WPForms.com doc articles. */
 					__( 'After saving these settings, be sure to <a href="%1$s" target="_blank" rel="noopener noreferrer">test a form submission</a>. This lets you see how emails will look, and to ensure that they <a href="%2$s" target="_blank" rel="noopener noreferrer">are delivered successfully</a>.', 'wpforms' ),
 					[
 						'a'  => [
@@ -895,10 +863,8 @@ class WPForms_Pro {
 						$settings->form_data,
 						esc_html__( 'Email Subject Line', 'wpforms' ),
 						[
-							'default'    => sprintf( /* translators: %s - form name. */
-								esc_html__( 'New Entry: %s', 'wpforms' ),
-								$settings->form->post_title
-							),
+							/* translators: %s - form name. */
+							'default'    => sprintf( esc_html__( 'New Entry: %s', 'wpforms' ), $settings->form->post_title ),
 							'smarttags'  => [
 								'type' => 'all',
 							],
@@ -970,6 +936,9 @@ class WPForms_Pro {
 								'parent'     => 'settings',
 								'subsection' => $id,
 								'input_id'   => 'wpforms-panel-field-notifications-sender_address-' . $id,
+								'readonly'   => ! empty( $from_email_after ),
+								'after'      => ! empty( $from_email_after ) ? '<div class="wpforms-alert wpforms-alert-warning">' . $from_email_after . '</div>' : '',
+								'class'      => ! empty( $from_email_after ) ? 'from-email wpforms-panel-field-warning' : 'from-email',
 							],
 							$settings->form_data,
 							$id
@@ -981,19 +950,11 @@ class WPForms_Pro {
 						'notifications',
 						'replyto',
 						$settings->form_data,
-						esc_html__( 'Reply-To', 'wpforms' ),
+						esc_html__( 'Reply-To Email Address', 'wpforms' ),
 						[
-							'tooltip'    => esc_html(
-								sprintf( /* translators: %s - <email@example.com>. */
-									__( 'Enter the email address or email address with recipient\'s name in "First Last %s" format.', 'wpforms' ),
-									// &#8203 is a zero-width space character. Without it, Tooltipster thinks it's an HTML tag
-									// and closes it at the end of the string, hiding everything after this value.
-									'<&#8203;email@example.com&#8203;>'
-								)
-							),
 							'smarttags'  => [
 								'type'   => 'fields',
-								'fields' => 'email,name',
+								'fields' => 'email',
 							],
 							'parent'     => 'settings',
 							'subsection' => $id,
@@ -1215,16 +1176,11 @@ class WPForms_Pro {
 						$settings->form_data,
 						esc_html__( 'Confirmation Page', 'wpforms' ),
 						[
-							'class'       => 'wpforms-panel-field-confirmations-page-choicesjs-unflippable',
-							'options'     => wpforms_builder_form_settings_confirmation_get_pages( $settings->form_data, $field_id ),
+							'options'     => wpforms_get_pages_list(),
 							'input_id'    => 'wpforms-panel-field-confirmations-page-' . $field_id,
 							'input_class' => 'wpforms-panel-field-confirmations-page',
 							'parent'      => 'settings',
 							'subsection'  => $field_id,
-							'choicesjs'   => [
-								'use_ajax'    => true,
-								'callback_fn' => 'select_pages',
-							],
 						]
 					);
 
@@ -1396,7 +1352,7 @@ class WPForms_Pro {
 	 */
 	public function form_notification_footer( $text ) {
 
-		$license = get_option( 'wpforms_license', [] );
+		$license = get_option( 'wpforms_license', array() );
 
 		if (
 			empty( $license['is_expired'] ) &&
@@ -1410,13 +1366,13 @@ class WPForms_Pro {
 			wp_kses(
 				/* translators: %s - WPForms.com Account dashboard URL. */
 				__( 'Your WPForms license key has expired. In order to continue receiving support and plugin updates you must renew your license key. Please log in to <a href="%s" target="_blank" rel="noopener noreferrer">your WPForms.com account</a> to renew your license.', 'wpforms' ),
-				[
-					'a' => [
-						'href'   => [],
-						'target' => [],
-						'rel'    => [],
-					],
-				]
+				array(
+					'a'      => array(
+						'href'   => array(),
+						'target' => array(),
+						'rel'    => array(),
+					),
+				)
 			),
 			'https://wpforms.com/account/'
 		);
@@ -1448,11 +1404,11 @@ class WPForms_Pro {
 
 		global $wpdb;
 
-		$custom_tables = [
+		$custom_tables = array(
 			'wpforms_entries',
 			'wpforms_entry_fields',
 			'wpforms_entry_meta',
-		];
+		);
 
 		$tables = wpforms()->get_existing_custom_tables();
 
@@ -1535,8 +1491,8 @@ class WPForms_Pro {
 			return;
 		}
 
-		add_filter( 'plugin_auto_update_setting_html', [ $this, 'auto_update_setting_html' ], 100, 3 );
-		add_filter( 'pre_update_site_option_auto_update_plugins', [ $this, 'update_auto_update_plugins_option' ], 100, 4 );
+		add_filter( 'plugin_auto_update_setting_html', array( $this, 'auto_update_setting_html' ), 100, 3 );
+		add_filter( 'pre_update_site_option_auto_update_plugins', array( $this, 'update_auto_update_plugins_option' ), 100, 4 );
 	}
 
 	/**
@@ -1654,7 +1610,7 @@ class WPForms_Pro {
 			return $plugins;
 		}
 
-		$addons_data = $license->get_addons();
+		$addons_data = $license->addons();
 
 		if ( empty( $addons_data ) ) {
 			return $plugins;

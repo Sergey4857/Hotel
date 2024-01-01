@@ -5,7 +5,7 @@ namespace WPForms\Admin\Tools\Views;
 use WPForms\Admin\Tools\Tools;
 
 /**
- * Single View class.
+ * Single view class.
  *
  * @since 1.6.6
  */
@@ -21,14 +21,14 @@ abstract class View {
 	protected $slug;
 
 	/**
-	 * Init.
+	 * Init view.
 	 *
 	 * @since 1.6.6
 	 */
 	abstract public function init();
 
 	/**
-	 * Get link to the view page.
+	 * Get link to the view.
 	 *
 	 * @since 1.6.6
 	 *
@@ -87,6 +87,7 @@ abstract class View {
 		return true;
 	}
 
+
 	/**
 	 * Display nonce field.
 	 *
@@ -104,7 +105,7 @@ abstract class View {
 	 */
 	public function verify_nonce() {
 
-		return ! empty( $_POST[ 'wpforms-tools-' . $this->slug . '-nonce' ] ) && wp_verify_nonce( sanitize_key( $_POST[ 'wpforms-tools-' . $this->slug . '-nonce' ] ), 'wpforms_' . $this->slug . '_nonce' );
+		return ! empty( $_POST[ 'wpforms-tools-' . $this->slug . '-nonce' ] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST[ 'wpforms-tools-' . $this->slug . '-nonce' ] ) ), 'wpforms_' . $this->slug . '_nonce' );
 	}
 
 	/**
@@ -113,4 +114,5 @@ abstract class View {
 	 * @since 1.6.6
 	 */
 	abstract public function display();
+
 }

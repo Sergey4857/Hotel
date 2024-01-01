@@ -15,12 +15,11 @@ class WPForms_Field_Divider extends WPForms_Field {
 	public function init() {
 
 		// Define field type information.
-		$this->name     = esc_html__( 'Section Divider', 'wpforms' );
-		$this->keywords = esc_html__( 'line, hr', 'wpforms' );
-		$this->type     = 'divider';
-		$this->icon     = 'fa-arrows-h';
-		$this->order    = 170;
-		$this->group    = 'fancy';
+		$this->name  = esc_html__( 'Section Divider', 'wpforms' );
+		$this->type  = 'divider';
+		$this->icon  = 'fa-arrows-h';
+		$this->order = 170;
+		$this->group = 'fancy';
 
 		$this->hooks();
 	}
@@ -48,10 +47,9 @@ class WPForms_Field_Divider extends WPForms_Field {
 		 */
 
 		// Options open markup.
-		$args = [
+		$args = array(
 			'markup' => 'open',
-		];
-
+		);
 		$this->field_option( 'basic-options', $field, $args );
 
 		// Label.
@@ -61,19 +59,17 @@ class WPForms_Field_Divider extends WPForms_Field {
 		$this->field_option( 'description', $field );
 
 		// Set label to disabled.
-		$args = [
+		$args = array(
 			'type'  => 'hidden',
 			'slug'  => 'label_disable',
 			'value' => '1',
-		];
-
+		);
 		$this->field_element( 'text', $field, $args );
 
 		// Options close markup.
-		$args = [
+		$args = array(
 			'markup' => 'close',
-		];
-
+		);
 		$this->field_option( 'basic-options', $field, $args );
 
 		/*
@@ -81,20 +77,18 @@ class WPForms_Field_Divider extends WPForms_Field {
 		 */
 
 		// Options open markup.
-		$args = [
+		$args = array(
 			'markup' => 'open',
-		];
-
+		);
 		$this->field_option( 'advanced-options', $field, $args );
 
 		// Custom CSS classes.
 		$this->field_option( 'css', $field );
 
 		// Options close markup.
-		$args = [
+		$args = array(
 			'markup' => 'close',
-		];
-
+		);
 		$this->field_option( 'advanced-options', $field, $args );
 	}
 

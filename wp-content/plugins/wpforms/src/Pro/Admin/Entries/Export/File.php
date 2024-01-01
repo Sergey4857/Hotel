@@ -62,6 +62,10 @@ class File {
 
 		$export_file = $this->get_tmpfname( $request_data );
 
+		if ( empty( $export_file ) ) {
+			return;
+		}
+
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen
 		$f         = fopen( 'php://temp', 'wb+' );
 		$enclosure = '"';
@@ -103,6 +107,10 @@ class File {
 	public function write_xlsx( $request_data ) {
 
 		$export_file = $this->get_tmpfname( $request_data );
+
+		if ( empty( $export_file ) ) {
+			return;
+		}
 
 		$writer = new \XLSXWriter();
 
@@ -174,18 +182,15 @@ class File {
 	 * Full pathname of the tmp file.
 	 *
 	 * @since 1.5.5
-	 * @since 1.8.0 Added exception.
 	 *
 	 * @param array $request_data Request data.
 	 *
 	 * @return string Temporary file full pathname.
-	 *
-	 * @throws Exception Unknown request.
 	 */
 	public function get_tmpfname( $request_data ) {
 
 		if ( empty( $request_data ) ) {
-			throw new Exception( $this->export->errors['unknown_request'] );
+			return '';
 		}
 
 		$export_dir  = $this->get_tmpdir();
@@ -229,29 +234,32 @@ class File {
 
 		$export_file = $this->get_tmpfname( $request_data );
 
+		if ( empty( $export_file ) ) {
+			throw new Exception( $this->export->errors['unknown_request'] );
+		}
+
 		clearstatcache( true, $export_file );
 
-		$filesystem = $this->get_filesystem();
-
-		if ( ! $filesystem->is_readable( $export_file ) || $filesystem->is_dir( $export_file ) ) {
+		if ( ! is_readable( $export_file ) || is_dir( $export_file ) ) {
 			throw new Exception( $this->export->errors['file_not_readable'] );
 		}
 
-		if ( $filesystem->size( $export_file ) === 0 ) {
-			throw new Exception( $export_file . $this->export->errors['file_empty'] );
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( @filesize( $export_file ) === 0 ) {
+			throw new Exception( $this->export->errors['file_empty'] );
 		}
 
 		$entry_suffix = ! empty( $request_data['db_args']['entry_id'] ) ? '-entry-' . $request_data['db_args']['entry_id'] : '';
 
 		$file_name = 'wpforms-' . $request_data['db_args']['form_id'] . '-' . sanitize_file_name( get_the_title( $request_data['db_args']['form_id'] ) ) . $entry_suffix . '-' . current_time( 'Y-m-d-H-i-s' ) . '.' . $request_data['type'];
 
-		if ( defined( 'WPFORMS_SAVE_ENTRIES_PATH' ) && ! wpforms_is_empty_string( WPFORMS_SAVE_ENTRIES_PATH ) ) {
-			$this->put_contents( WPFORMS_SAVE_ENTRIES_PATH . $file_name, $filesystem->get_contents( $export_file ) );
+		if ( defined( 'WPFORMS_SAVE_ENTRIES_PATH' ) ) {
+			$this->put_contents( WPFORMS_SAVE_ENTRIES_PATH . $file_name, file_get_contents( $export_file ) );
 		} else {
 			$this->http_headers( $file_name );
 
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $filesystem->get_contents( $export_file );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_readfile
+			readfile( $export_file );
 		}
 
 		// Schedule clean up.
@@ -410,12 +418,12 @@ class File {
 	 */
 	public function remove_old_export_files() {
 
+		clearstatcache();
+
 		$files = glob( $this->get_tmpdir() . '/*' );
 		$now   = time();
 
 		foreach ( $files as $file ) {
-			clearstatcache( true, $file );
-
 			if (
 				is_file( $file ) &&
 				pathinfo( $file, PATHINFO_BASENAME ) !== 'index.html' &&
@@ -459,7 +467,7 @@ class File {
 		return $columns_row;
 	}
 
-	/**
+	/*
 	 * Put file contents using WP Filesystem.
 	 *
 	 * @since 1.7.3
@@ -472,7 +480,12 @@ class File {
 	 */
 	private function put_contents( $export_file, $file_contents ) {
 
-		$filesystem = $this->get_filesystem();
+		// @todo Add support for other filesystems.
+		$filesystem = $this->get_filesystem_direct();
+
+		if ( ! $filesystem ) {
+			throw new Exception( $this->export->errors['no_direct_access'] );
+		}
 
 		$filesystem->put_contents(
 			$export_file,
@@ -481,39 +494,23 @@ class File {
 	}
 
 	/**
-	 * Get current filesystem.
+	 * Get direct filesystem.
 	 *
-	 * @since 1.8.0
+	 * @since 1.7.4
 	 *
-	 * @return WP_Filesystem_Base
-	 *
-	 * @throws Exception File system isn't configured as well.
+	 * @return WP_Filesystem_Base|null
 	 */
-	private function get_filesystem() {
+	private function get_filesystem_direct() {
 
 		global $wp_filesystem;
 
-		// We have to start the buffer to prevent form output
-		// when the file system is ssh/FTP but not configured.
-		ob_start();
-
-		$url = add_query_arg(
-			[
-				'page' => 'wpforms-tools',
-				'view' => 'export',
-			],
-			admin_url( 'admin.php' )
-		);
-
-		$credentials = request_filesystem_credentials( $url, '', false, false, null );
-
-		ob_clean();
-
-		if ( $credentials === false ) {
-			throw new Exception( $this->export->errors['file_system_not_configured'] );
+		if ( ! $wp_filesystem && ! WP_Filesystem() ) {
+			return null;
 		}
 
-		WP_Filesystem( $credentials );
+		if ( $wp_filesystem->method !== 'direct' ) {
+			return null;
+		}
 
 		return $wp_filesystem;
 	}

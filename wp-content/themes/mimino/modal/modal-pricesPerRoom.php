@@ -3,9 +3,9 @@
 <div class="backdrop is-hidden" data-modal="view-prices">
   <div class="prices-modal modal">
     <button class="modal-close-btn" type="button">
-      <svg width="28" height="28">
+      <!-- <svg width="28" height="28">
         <use href="./img/icons/sprite.svg#close-x"></use>
-      </svg>
+      </svg> -->
     </button>
     <h2 class="modal-title">
       prices per <span class="prices-current-font-style">room</span>
@@ -25,9 +25,9 @@
                 <option value="6">6</option>
                 <option value="7">7</option>
               </select>
-              <svg class="modal-select-icon" width="20" height="20">
+              <!-- <svg class="modal-select-icon" width="20" height="20">
                 <use href="./img/icons/sprite.svg#btn-select"></use>
-              </svg>
+              </svg> -->
             </span>
             Number of nights
           </label>

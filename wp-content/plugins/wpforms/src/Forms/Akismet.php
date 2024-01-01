@@ -128,7 +128,7 @@ class Akismet {
 	 *
 	 * @return bool
 	 */
-	private function entry_is_spam( $form_data, $entry ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
+	private function entry_is_spam( $form_data, $entry ) {
 
 		$entry_data = $this->get_entry_data( $form_data['fields'], $entry );
 		$request    = [
@@ -150,10 +150,12 @@ class Akismet {
 			'honypot_field_name'   => 'wpforms["hp"]',
 		];
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// If we are on a form preview page, tell Akismet that this is a test submission.
-		if ( wpforms()->get( 'preview' )->is_preview_page() ) {
+		if ( isset( $_GET['wpforms_form_preview'] ) ) {
 			$request['is_test'] = true;
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$response = AkismetPlugin::http_post( build_query( $request ), 'comment-check' );
 

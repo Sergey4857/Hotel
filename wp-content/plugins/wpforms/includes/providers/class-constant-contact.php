@@ -113,11 +113,11 @@ class WPForms_Constant_Contact extends WPForms_Provider {
 				wpforms_log(
 					'Constant Contact Subscription stopped by conditional logic',
 					$fields,
-					[
-						'type'    => [ 'provider', 'conditional_logic' ],
+					array(
+						'type'    => array( 'provider', 'conditional_logic' ),
 						'parent'  => $entry_id,
 						'form_id' => $form_data['id'],
-					]
+					)
 				);
 				continue;
 			}
@@ -131,11 +131,11 @@ class WPForms_Constant_Contact extends WPForms_Provider {
 				wpforms_log(
 					'Constant Contact API Error',
 					$contact->get_error_message(),
-					[
-						'type'    => [ 'provider', 'error' ],
+					array(
+						'type'    => array( 'provider', 'error' ),
 						'parent'  => $entry_id,
 						'form_id' => $form_data['id'],
-					]
+					)
 				);
 				continue;
 			}
@@ -144,7 +144,7 @@ class WPForms_Constant_Contact extends WPForms_Provider {
 			 * Setup Merge Vars
 			 */
 
-			$merge_vars = [];
+			$merge_vars = array();
 
 			foreach ( $connection['fields'] as $name => $merge_var ) {
 
@@ -171,32 +171,26 @@ class WPForms_Constant_Contact extends WPForms_Provider {
 
 				// Constant Contact doesn't native URL field so it has to be
 				// stored in a custom field.
-				if ( $name === 'url' ) {
-
-					$merge_vars['custom_fields'] = [
-						[
+				if ( 'url' === $name ) {
+					$merge_vars['custom_fields'] = array(
+						array(
 							'name'  => 'custom_field_1',
 							'value' => $value,
-						],
-					];
-
+						),
+					);
 					continue;
 				}
 
 				// Constant Contact stores name in two fields, so we have to
 				// separate it.
-				if ( $name === 'full_name' ) {
-
+				if ( 'full_name' === $name ) {
 					$names = explode( ' ', $value );
-
 					if ( ! empty( $names[0] ) ) {
 						$merge_vars['first_name'] = $names[0];
 					}
-
 					if ( ! empty( $names[1] ) ) {
 						$merge_vars['last_name'] = $names[1];
 					}
-
 					continue;
 				}
 
@@ -437,9 +431,9 @@ class WPForms_Constant_Contact extends WPForms_Provider {
 			wpforms_log(
 				'Constant Contact API Error',
 				'',
-				[
-					'type' => [ 'provider', 'error' ],
-				]
+				array(
+					'type' => array( 'provider', 'error' ),
+				)
 			);
 
 			return $this->error( esc_html__( 'API list error: Constant API error', 'wpforms-lite' ) );
@@ -461,54 +455,54 @@ class WPForms_Constant_Contact extends WPForms_Provider {
 	 */
 	public function api_fields( $connection_id = '', $account_id = '', $list_id = '' ) {
 
-		$provider_fields = [
-			[
+		$provider_fields = array(
+			array(
 				'name'       => 'Email',
 				'field_type' => 'email',
 				'req'        => '1',
 				'tag'        => 'email',
-			],
-			[
+			),
+			array(
 				'name'       => 'Full Name',
 				'field_type' => 'name',
 				'tag'        => 'full_name',
-			],
-			[
+			),
+			array(
 				'name'       => 'First Name',
 				'field_type' => 'first',
 				'tag'        => 'first_name',
-			],
-			[
+			),
+			array(
 				'name'       => 'Last Name',
 				'field_type' => 'last',
 				'tag'        => 'last_name',
-			],
-			[
+			),
+			array(
 				'name'       => 'Phone',
 				'field_type' => 'text',
 				'tag'        => 'work_phone',
-			],
-			[
+			),
+			array(
 				'name'       => 'Website',
 				'field_type' => 'text',
 				'tag'        => 'url',
-			],
-			[
+			),
+			array(
 				'name'       => 'Address',
 				'field_type' => 'address',
 				'tag'        => 'address',
-			],
-			[
+			),
+			array(
 				'name'       => 'Job Title',
 				'field_type' => 'text',
 				'tag'        => 'job_title',
-			],
-			[
+			),
+			array(
 				'name'       => 'Company',
 				'field_type' => 'text',
 				'tag'        => 'company_name',
-			],
-		];
+			),
+		);
 
 		return $provider_fields;
 	}
@@ -540,7 +534,7 @@ class WPForms_Constant_Contact extends WPForms_Provider {
 			<p>
 				<?php esc_html_e( 'Please fill out all of the fields below to register your new Constant Contact account.', 'wpforms-lite' ); ?>
 				<br>
-				<a href="<?php echo esc_url( wpforms_utm_link( 'https://wpforms.com/docs/how-to-connect-constant-contact-with-wpforms/', 'Marketing Integrations', 'Constant Contact Documentation' ) ); ?>" target="_blank" rel="noopener noreferrer">
+				<a href="https://wpforms.com/docs/how-to-connect-constant-contact-with-wpforms/" target="_blank" rel="noopener noreferrer">
 					<?php esc_html_e( 'Click here for documentation on connecting WPForms with Constant Contact.', 'wpforms-lite' ); ?>
 				</a>
 			</p>
@@ -679,7 +673,7 @@ class WPForms_Constant_Contact extends WPForms_Provider {
 
 		?>
 		<p>
-			<a href="<?php echo esc_url( wpforms_utm_link( 'https://wpforms.com/docs/how-to-connect-constant-contact-with-wpforms/', 'Settings - Integration', 'Constant Contact Documentation' ) ); ?>" target="_blank" rel="noopener noreferrer">
+			<a href="https://wpforms.com/docs/how-to-connect-constant-contact-with-wpforms/" target="_blank" rel="noopener noreferrer">
 				<?php esc_html_e( 'Click here for documentation on connecting WPForms with Constant Contact.', 'wpforms-lite' ); ?>
 			</a>
 		</p>

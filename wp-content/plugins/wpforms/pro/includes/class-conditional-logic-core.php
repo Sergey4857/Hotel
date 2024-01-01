@@ -182,7 +182,7 @@ class WPForms_Conditional_Logic_Core {
 	 *
 	 * @return string
 	 */
-	public function builder_block( $args = [], $echo = true ) {
+	public function builder_block( $args = array(), $echo = true ) {
 
 		if ( ! empty( $args['form'] ) ) {
 			$form_fields = wpforms_get_form_fields( $args['form'], wpforms_get_conditional_logic_form_fields_supported() );
@@ -663,20 +663,14 @@ class WPForms_Conditional_Logic_Core {
 						continue;
 					}
 
-					$rule_field = $rule['field'];
-
-					if ( empty( $fields[ $rule_field ]['type'] ) ) {
-						continue;
-					}
-
+					$rule_field    = $rule['field'];
 					$rule_operator = $rule['operator'];
 					$rule_value    = isset( $rule['value'] ) ? $rule['value'] : '';
 
 					if ( in_array( $fields[ $rule_field ]['type'], $this->get_text_based_fields(), true ) ) {
 
 						// Text based fields.
-						$left  = isset( $fields[ $rule_field ]['value'] ) ? $fields[ $rule_field ]['value'] : '';
-						$left  = strtolower( trim( wpforms_decode_string( $left ) ) );
+						$left  = strtolower( trim( wpforms_decode_string( $fields[ $rule_field ]['value'] ) ) );
 						$right = strtolower( trim( $rule_value ) );
 
 						switch ( $rule_operator ) {
@@ -770,18 +764,20 @@ class WPForms_Conditional_Logic_Core {
 
 							foreach ( $form_data['fields'][ $rule_field ]['choices'] as $key => $choice ) {
 
-								// Use only the label for comparison.
-								$choice_label = wpforms_decode_string( $choice['label'] );
+								$choice = array_map( 'wpforms_decode_string', $choice );
 
-								// Remove newlines from the choice (label or value) before comparing.
-								// Newlines can be pasted with a long text to the choice label (or value) in the form builder.
-								$choice_label = sanitize_text_field( $choice_label );
+								if ( in_array( $fields[ $rule_field ]['type'], [ 'radio', 'checkbox', 'select' ], true ) ) {
+									// Remove newlines from the choice (label or value) before comparing.
+									// Newlines can be pasted with a long text to the choice label (or value) in the form builder.
+									$choice = array_map( 'sanitize_text_field', $choice );
+								}
 
-								$values = array_map( 'wpforms_decode_string', $values );
+								foreach ( $values as $value ) {
+									$value = wpforms_decode_string( $value );
 
-								// Check if the choice label is in the value array.
-								if ( in_array( $choice_label, $values, true ) ) {
-									$provided_id[] = $key;
+									if ( in_array( $value, $choice, true ) ) {
+										$provided_id[] = $key;
+									}
 								}
 							}
 						}

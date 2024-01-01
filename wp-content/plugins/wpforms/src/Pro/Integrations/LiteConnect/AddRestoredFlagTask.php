@@ -60,7 +60,7 @@ class AddRestoredFlagTask {
 				 ->once( $run_at )
 				 ->register();
 
-		if ( $action_id === null ) {
+		if ( is_null( $action_id ) ) {
 			wpforms_log(
 				'Lite Connect: error creating the AS task',
 				[

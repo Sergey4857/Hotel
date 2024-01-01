@@ -132,7 +132,7 @@ class Widget extends Widget_Base {
 							'br' => [],
 						]
 					),
-					'content_classes' => 'elementor-panel-alert elementor-panel-alert-info wpforms-elementor-no-forms-notice',
+					'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
 				]
 			);
 		}
@@ -307,18 +307,8 @@ class Widget extends Widget_Base {
 	 */
 	protected function render_frontend() {
 
-		static $is_root_vars_displayed = false;
-
-		$css_vars_obj = wpforms()->get( 'css_vars' );
-
-		if ( ! empty( $css_vars_obj ) && wpforms_get_render_engine() === 'modern' && ! $is_root_vars_displayed ) {
-			$css_vars_obj->output_root( true );
-
-			$is_root_vars_displayed = true;
-		}
-
 		// Render selected form.
-		$this->render_form();
+		echo do_shortcode( $this->render_shortcode() );
 	}
 
 	/**
@@ -328,38 +318,21 @@ class Widget extends Widget_Base {
 	 */
 	public function render_plain_content() {
 
-		$this->render_form();
+		echo $this->render_shortcode(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
 	 * Render shortcode.
 	 *
 	 * @since 1.6.2
-	 * @deprecated 1.8.3
 	 */
 	public function render_shortcode() {
-
-		_deprecated_function( __METHOD__, '1.8.3 of the WPForms plugin', __CLASS__ . '::render_form()' );
 
 		return sprintf(
 			'[wpforms id="%1$d" title="%2$s" description="%3$s"]',
 			absint( $this->get_settings_for_display( 'form_id' ) ),
 			sanitize_key( $this->get_settings_for_display( 'display_form_name' ) === 'yes' ? 'true' : 'false' ),
 			sanitize_key( $this->get_settings_for_display( 'display_form_description' ) === 'yes' ? 'true' : 'false' )
-		);
-	}
-
-	/**
-	 * Render a form.
-	 *
-	 * @since 1.8.3
-	 */
-	public function render_form() {
-
-		wpforms_display(
-			$this->get_settings_for_display( 'form_id' ),
-			$this->get_settings_for_display( 'display_form_name' ) === 'yes',
-			$this->get_settings_for_display( 'display_form_description' ) === 'yes'
 		);
 	}
 

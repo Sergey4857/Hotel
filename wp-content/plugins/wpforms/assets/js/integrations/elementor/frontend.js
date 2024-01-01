@@ -35,9 +35,9 @@ var WPFormsElementorFrontend = window.WPFormsElementorFrontend || ( function( do
 		 */
 		events: function() {
 
-			window.addEventListener( 'elementor/popup/show', function( event ) {
+			$( document ).on( 'elementor/popup/show', function( event, id, instance ) {
 
-				let $modal = $( '#elementor-popup-modal-' + event.detail.id ),
+				var $modal = $( '#elementor-popup-modal-' + id ),
 					$form  = $modal.find( '.wpforms-form' );
 
 				if ( ! $form.length ) {

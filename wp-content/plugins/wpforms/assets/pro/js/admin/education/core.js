@@ -59,7 +59,7 @@ WPFormsEducation.proCore = window.WPFormsEducation.proCore || ( function( docume
 		openModalButtonClick: function() {
 
 			$( document ).on(
-				'click',
+				'mousedown',
 				'.education-modal',
 				function( event ) {
 
@@ -86,7 +86,7 @@ WPFormsEducation.proCore = window.WPFormsEducation.proCore || ( function( docume
 							app.licenseModal(
 								$this.data( 'name' ),
 								$this.data( 'field-name' ),
-								WPFormsEducation.core.getUTMContentValue( $this )
+								$this.data( 'utm-content' )
 							);
 							break;
 					}

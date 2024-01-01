@@ -68,32 +68,25 @@ WPFormsEducation.core = window.WPFormsEducation.core || ( function( document, wi
 		 */
 		openModalButtonClick: function() {
 
-			$( document )
-				.on( 'click', '.education-modal:not(.wpforms-add-fields-button)', app.openModalButtonHandler )
-				.on( 'mousedown', '.education-modal.wpforms-add-fields-button', app.openModalButtonHandler );
-		},
+			$( document ).on(
+				'click',
+				'.education-modal',
+				function( event ) {
 
-		/**
-		 * Open education modal handler.
-		 *
-		 * @since 1.8.0
-		 *
-		 * @param {Event} event Event.
-		 */
-		openModalButtonHandler: function( event ) {
+					var $this = $( this );
 
-			event.preventDefault();
+					event.preventDefault();
 
-			const $this = $( this );
-
-			switch ( $this.data( 'action' ) ) {
-				case 'activate':
-					app.activateModal( $this );
-					break;
-				case 'install':
-					app.installModal( $this );
-					break;
-			}
+					switch ( $this.data( 'action' ) ) {
+						case 'activate':
+							app.activateModal( $this );
+							break;
+						case 'install':
+							app.installModal( $this );
+							break;
+					}
+				}
+			);
 		},
 
 		/**
@@ -112,7 +105,6 @@ WPFormsEducation.core = window.WPFormsEducation.core || ( function( document, wi
 						action: 'wpforms_education_dismiss',
 						nonce: wpforms_education.nonce,
 						section: $this.data( 'section' ),
-						page: typeof window.pagenow === 'string' ? window.pagenow : '',
 					};
 
 				if ( $cont.hasClass( 'wpforms-dismiss-out' ) ) {
@@ -233,11 +225,6 @@ WPFormsEducation.core = window.WPFormsEducation.core || ( function( document, wi
 			// Test if the base URL already contains `?`.
 			var appendChar = /(\?)/.test( baseURL ) ? '&' : '?';
 
-			// If the upgrade link is changed by partners, appendChar has to be encoded.
-			if ( baseURL.indexOf( 'https://wpforms.com' ) === -1 ) {
-				appendChar = encodeURIComponent( appendChar );
-			}
-
 			return baseURL + appendChar + 'utm_content=' + encodeURIComponent( utmContent.trim() );
 		},
 
@@ -262,22 +249,18 @@ WPFormsEducation.core = window.WPFormsEducation.core || ( function( document, wi
 		 */
 		activateModal: function( $button  ) {
 
-			var feature = $button.data( 'name' ),
-				message = $button.data( 'message' );
-
-			const canActivateAddons = wpforms_education.can_activate_addons;
+			var feature = $button.data( 'name' );
 
 			$.alert( {
 				title  : false,
-				content: message ? message : wpforms_education.activate_prompt.replace( /%name%/g, feature ),
+				content: wpforms_education.activate_prompt.replace( /%name%/g, feature ),
 				icon   : 'fa fa-info-circle',
 				type   : 'blue',
 				buttons: {
 					confirm: {
 						text    : wpforms_education.activate_confirm,
-						btnClass: 'btn-confirm' + ( ! canActivateAddons ? ' hidden' : '' ),
+						btnClass: 'btn-confirm',
 						keys    : [ 'enter' ],
-						isHidden: ! canActivateAddons,
 						action  : function() {
 
 							this.$$confirm
@@ -425,7 +408,6 @@ WPFormsEducation.core = window.WPFormsEducation.core || ( function( document, wi
 		installModal: function( $button ) {
 
 			var feature = $button.data( 'name' ),
-				message = $button.data( 'message' ),
 				url = $button.data( 'url' ),
 				licenseType = $button.data( 'license' );
 
@@ -434,20 +416,18 @@ WPFormsEducation.core = window.WPFormsEducation.core || ( function( document, wi
 				return;
 			}
 
-			const canInstallAddons = wpforms_education.can_install_addons;
-
 			$.alert( {
 				title   : false,
-				content : message ? message : wpforms_education.install_prompt.replace( /%name%/g, feature ),
+				content : wpforms_education.install_prompt.replace( /%name%/g, feature ),
 				icon    : 'fa fa-info-circle',
 				type    : 'blue',
 				boxWidth: '425px',
 				buttons : {
 					confirm: {
 						text    : wpforms_education.install_confirm,
-						btnClass: 'btn-confirm' + ( ! canInstallAddons ? ' hidden' : '' ),
+						btnClass: 'btn-confirm',
 						keys    : [ 'enter' ],
-						isHidden: ! canInstallAddons,
+						isHidden: ! wpforms_education.can_install_addons,
 						action  : function() {
 
 							this.$$confirm.prop( 'disabled', true )

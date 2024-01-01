@@ -89,20 +89,20 @@ class General {
 	 */
 	public function set_initial_args() {
 
-		$header_args = [
+		$header_args = array(
 			'title' => \esc_html__( 'WPForms', 'wpforms-lite' ),
-		];
+		);
 
 		if ( ! $this->plain_text ) {
 			$header_args['header_image'] = $this->get_header_image();
 		}
 
-		$args = [
+		$args = array(
 			'header' => $header_args,
-			'body'   => [ 'message' => $this->get_message() ],
-			'footer' => [],
-			'style'  => [],
-		];
+			'body'   => array( 'message' => $this->get_message() ),
+			'footer' => array(),
+			'style'  => array(),
+		);
 
 		$args = \apply_filters( 'wpforms_emails_templates_general_set_initial_args', $args, $this );
 
@@ -169,10 +169,10 @@ class General {
 	public function get_args( $type ) {
 
 		if ( ! empty( $type ) ) {
-			return isset( $this->args[ $type ] ) ? apply_filters( 'wpforms_emails_templates_general_get_args_' . $type, $this->args[ $type ], $this ) : [];
+			return isset( $this->args[ $type ] ) ? \apply_filters( 'wpforms_emails_templates_general_get_args_' . $type, $this->args[ $type ], $this ) : array();
 		}
 
-		return apply_filters( 'wpforms_emails_templates_general_get_args', $this->args, $this );
+		return \apply_filters( 'wpforms_emails_templates_general_get_args', $this->args, $this );
 	}
 
 	/**
@@ -244,7 +244,7 @@ class General {
 			}
 
 			if ( ! isset( $this->args[ $type ] ) || ! \is_array( $this->args[ $type ] ) ) {
-				$this->args[ $type ] = [];
+				$this->args[ $type ] = array();
 			}
 
 			$this->args[ $type ] = $merge ? \array_merge( $this->args[ $type ], $value ) : $value;
@@ -319,27 +319,27 @@ class General {
 		 *
 		 * Example:
 		 *
-		 * $img = [
+		 * $img = array(
 		 *     'url'   => \wpforms_setting( 'email-header-image' ),
 		 *     'width' => 150,
-		 * ];
+		 * );
 		 *
 		 *
 		 * To set percentage values for the modern email clients, use $this->set_args() method:
 		 *
 		 * $this->set_args(
-		 *     [
-		 *         'style' => [
+		 *     array(
+		 *         'style' => array(
 		 *             'header_image_max_width' => '45%',
-		 *         ],
-		 *    ]
+		 *         ),
+		 *    )
 		 *);
 		 *
 		 * Both pixel and percentage approaches work well with 'wpforms_emails_templates_general_get_header_image' filter or this class extension.
 		 */
-		$img = [
+		$img = array(
 			'url' => \wpforms_setting( 'email-header-image' ),
-		];
+		);
 
 		return \apply_filters( 'wpforms_emails_templates_general_get_header_image', $img, $this );
 	}
@@ -377,11 +377,11 @@ class General {
 	 */
 	protected function get_content_parts() {
 
-		$parts = [
+		$parts = array(
 			'header' => $this->get_content_part( 'header' ),
 			'body'   => $this->get_content_part( 'body' ),
 			'footer' => $this->get_content_part( 'footer' ),
-		];
+		);
 
 		return \apply_filters( 'wpforms_emails_templates_general_get_content_parts', $parts, $this );
 	}
@@ -405,10 +405,10 @@ class General {
 			return;
 		}
 
-		$style_templates = [
+		$style_templates = array(
 			'style'   => $this->get_full_template_name( 'style' ),
 			'queries' => $this->get_full_template_name( 'queries' ),
-		];
+		);
 
 		$styler = new Styler( $content, $style_templates, $this->get_args( 'style' ) );
 

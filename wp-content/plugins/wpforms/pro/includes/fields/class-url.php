@@ -15,12 +15,11 @@ class WPForms_Field_URL extends WPForms_Field {
 	public function init() {
 
 		// Define field type information.
-		$this->name     = esc_html__( 'Website / URL', 'wpforms' );
-		$this->keywords = esc_html__( 'uri, link, hyperlink', 'wpforms' );
-		$this->type     = 'url';
-		$this->icon     = 'fa-link';
-		$this->order    = 90;
-		$this->group    = 'fancy';
+		$this->name  = esc_html__( 'Website / URL', 'wpforms' );
+		$this->type  = 'url';
+		$this->icon  = 'fa-link';
+		$this->order = 90;
+		$this->group = 'fancy';
 	}
 
 	/**
@@ -36,10 +35,9 @@ class WPForms_Field_URL extends WPForms_Field {
 		 */
 
 		// Options open markup.
-		$args = [
+		$args = array(
 			'markup' => 'open',
-		];
-
+		);
 		$this->field_option( 'basic-options', $field, $args );
 
 		// Label.
@@ -52,10 +50,9 @@ class WPForms_Field_URL extends WPForms_Field {
 		$this->field_option( 'required', $field );
 
 		// Options close markup.
-		$args = [
+		$args = array(
 			'markup' => 'close',
-		];
-
+		);
 		$this->field_option( 'basic-options', $field, $args );
 
 		/*
@@ -63,10 +60,9 @@ class WPForms_Field_URL extends WPForms_Field {
 		 */
 
 		// Options open markup.
-		$args = [
+		$args = array(
 			'markup' => 'open',
-		];
-
+		);
 		$this->field_option( 'advanced-options', $field, $args );
 
 		// Size.
@@ -173,12 +169,12 @@ class WPForms_Field_URL extends WPForms_Field {
 	public function format( $field_id, $field_submit, $form_data ) {
 
 		// Set field details.
-		wpforms()->process->fields[ $field_id ] = [
+		wpforms()->process->fields[ $field_id ] = array(
 			'name'  => ! empty( $form_data['fields'][ $field_id ]['label'] ) ? sanitize_text_field( $form_data['fields'][ $field_id ]['label'] ) : '',
 			'value' => trim( $field_submit ),
 			'id'    => absint( $field_id ),
 			'type'  => $this->type,
-		];
+		);
 	}
 }
 

@@ -212,59 +212,43 @@ $restaurant_menu_section = get_field("section-restaurant-menu");
       <h2 class="blog-title">dishes of the month</h2>
       <div class="blog-wrapper">
         <div class="slider-blog">
-          <div class="blog-item">
-            <div class="blog-disk-box">
-              <p class="blog-dish-title">Cheese soup with chicken</p>
-              <p class="blog-dish-description">Rich, cheesy chicken queso soup made with three types of cheeses, tender
-                chicken, green chiles, and spices—all the flavors of cheese queso but in a soup! The creamiest, most
-                flavorful
-                Chicken Cheese Soup.</p>
-            </div>
-            <img
-              src="<?php echo get_template_directory_uri() . "./src/images/blog-dish/Chicken-Mac-and-Cheese-Soup_Header_800x550.jpeg?>"; ?>"
-              alt="Cheese soup">
-          </div>
 
-          <div class="blog-item">
+          <?php
+          global $post;
 
-            <div class="blog-disk-box">
-              <p class="blog-dish-title">Gorbusha in white wine</p>
-              <p class="blog-dish-description">Fish in white wine sauce is a classic recipe that combines the delicate
-                flavors
-                of white fish with the richness of a Chardonnay-infused sauce bursting with herbs, garlic and lemon.</p>
-            </div>
+          $myposts = get_posts([
+            'numberposts' => -1,
+            'offset' => 1,
+            'category_name' => "dishes_month",
+            'post_type' => 'post',
+            'order' => 'ASC',
 
-            <img
-              src="<?php echo get_template_directory_uri() . "./src/images/blog-dish/1677842334_food-pibig-info-p-riba-v-souse-na-skovorode-krasivo-83.jpg?>"; ?>"
-              alt="Gorbusha">
-          </div>
+          ]);
 
+          if ($myposts) {
+            foreach ($myposts as $post) {
+              setup_postdata($post);
+              ?>
+              <div class="blog-item">
+                <div class="blog-disk-box">
+                  <p class="blog-dish-title">
+                    <?php the_title() ?>
+                  </p>
+                  <div class="blog-dish-description">
+                    <?php echo get_the_content(); ?>
+                  </div>
+                </div>
+                <img src="<?php the_post_thumbnail_url(); ?>" alt="Cheese soup">
+              </div>
+              <?php
+            }
+          } else {
+            // Постов не найдено
+          }
 
-          <div class="blog-item">
-            <div class="blog-disk-box">
-              <p class="blog-dish-title">French fries</p>
-              <p class="blog-dish-description">French fries, side dish or snack typically made from deep-fried potatoes
-                that
-                have been cut into various shapes, especially thin strips. Fries are often salted and served with other
-                items,
-                including ketchup, mayonnaise, or vinegar.</p>
-            </div>
-            <img src="<?php echo get_template_directory_uri() . "./src/images/blog-dish/maxresdefault.jpg?>"; ?>"
-              alt="french fries">
-          </div>
+          wp_reset_postdata(); // Сбрасываем $post
+          ?>
 
-          <div class="blog-item">
-            <div class="blog-disk-box">
-              <p class="blog-dish-title">Tiramisu</p>
-              <p class="blog-dish-description">Tiramisu is an elegant and rich layered Italian dessert made with
-                delicate
-                ladyfinger cookies, espresso or instant espresso, mascarpone cheese, eggs, sugar, Marsala wine, rum and
-                cocoa
-                powder.</p>
-            </div>
-            <img src="<?php echo get_template_directory_uri() . "./src/images/blog-dish/Tiramisu.jpg?>"; ?>"
-              alt="Cheese soup">
-          </div>
         </div>
         <div class="slider-btns">
           <button type="button" class="slider-btn-prev">
@@ -534,6 +518,8 @@ $restaurant_menu_section = get_field("section-restaurant-menu");
 
 <!-- Футер -->
 
+<?php get_template_part("modal/modal-bookARoom") ?>
+<?php get_template_part("modal/modal-bookATable") ?>
 
 <?php get_footer() ?>
 

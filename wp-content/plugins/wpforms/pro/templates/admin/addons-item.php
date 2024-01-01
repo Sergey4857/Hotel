@@ -43,7 +43,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<strong>
 					<?php
 					printf(
-						/* translators: %s - status label. */
+						/* translators: %s - addon status label. */
 						esc_html__( 'Status: %s', 'wpforms' ),
 						'<span class="status-label status-' . esc_attr( $addon['status'] ) . '">' . wp_kses_post( $status_label ) . '</span>'
 					);

@@ -25,12 +25,7 @@ class Upgrade168 extends UpgradeBase {
 	 */
 	public function run() { // phpcs:ignore WPForms.PHP.HooksMethod.InvalidPlaceForAddingHooks
 
-		if (
-			! (
-				function_exists( 'wpforms_form_templates_pack_load' ) ||
-				function_exists( 'wpforms_form_templates_pack' )
-			)
-		) {
+		if ( ! function_exists( 'wpforms_form_templates_pack' ) ) {
 			return true;
 		}
 

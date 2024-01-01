@@ -194,105 +194,31 @@ Template Name: homePage
 
 			<div class="restaurant-img-wrapper slider-container-main-restaurant">
 
-				<div>
-					<picture>
-						<source
-							srcset="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/desktop/restaurant-desk-4-1x-min.jpg" ?>"
-							media="(min-width:1440px)" width="266" height="309" />
+				<?php
+				$rows = get_field("restaurant-slider");
 
-						<source
-							srcset="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/tablet/restaurant-tabl-2-1x-min.jpg" ?>"
-							media="(min-width:768px)" width="336" height="309" />
+				if ($rows) {
 
-						<img
-							src="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/mobile/restaurant-mob-2-1x-min.jpg" ?>"
-							alt="restaurant1" width="157" height="201" />
-					</picture>
-				</div>
+					foreach ($rows as $row) {
+						?>
 
+						<div>
+							<picture>
+								<source srcset="<?php echo $row["slider-image-desc"] ?>" media="(min-width:1440px)" width="266"
+									height="309" />
 
-				<div>
-					<picture>
-						<source
-							srcset="
-								<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/desktop/restaurant-desk-6-1x-min.jpg" ?>"
-							media="(min-width:1440px)" width="266" height="309" />
+								<source srcset="<?php echo $row["slider-image-tabl"] ?>" media="(min-width:768px)" width="336"
+									height="309" />
 
-						<source
-							srcset="
-							<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/tablet/restaurant-tabl-3-1x-min.jpg" ?>"
-							media="(min-width:768px)" width="336" height="309" />
+								<img src="<?php echo $row["slider-image-mobile"] ?>" alt="restaurant1" width="157" height="201" />
+							</picture>
+						</div>
 
-						<img
-							src="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/mobile/restaurant-mob-3-1x-min.jpg" ?>"
-							width="157" height="201" alt="restaurant3" />
-					</picture>
-				</div>
+						<?php
+					}
 
-				<div>
-					<picture>
-						<source
-							srcset="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/desktop/restaurant-desk-7-1x-min.jpg" ?>"
-							media="(min-width:1440px)" width="266" height="309" />
-
-						<source
-							srcset="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/tablet/restaurant-tabl-4-1x-min.jpg" ?>"
-							media="(min-width:768px)" width="336" height="309" />
-
-						<img
-							src="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/mobile/restaurant-mob-4-1x-min.jpg" ?>"
-							width="157" height="201" alt="restaurant4" />
-					</picture>
-				</div>
-
-				<div>
-					<picture>
-						<source
-							srcset="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/desktop/restaurant-desk-8-1x-min.jpg" ?>"
-							media="(min-width:1440px)" width="266" height="309" />
-
-						<source
-							srcset="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/tablet/restaurant-tabl-5-1x-min.jpg" ?>"
-							media="(min-width:768px)" width="336" height="309" />
-
-						<img
-							src="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/mobile/restaurant-mob-5-1x-min.jpg" ?>"
-							width="157" height="201" alt="restaurant5" />
-					</picture>
-				</div>
-
-				<div>
-					<picture>
-						<source
-							srcset="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/desktop/restaurant-desk-9-1x-min.jpg" ?>"
-							media="(min-width:1440px)" width="266" height="309" />
-
-						<source
-							srcset="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/tablet/restaurant-tabl-6-1x-min.jpg" ?>"
-							media="(min-width:768px)" width="336" height="309" />
-
-						<img
-							src="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/mobile/restaurant-mob-6-1x-min.jpg" ?>"
-							width="157" height="201" alt="restaurant6" />
-					</picture>
-				</div>
-
-				<div>
-					<picture>
-						<source
-							srcset="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/desktop/restaurant-desk-10-1x-min.jpg" ?>"
-							media="(min-width:1440px)" width="266" height="309" />
-
-						<source
-							srcset="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/tablet/restaurant-tabl-7-1x-min.jpg" ?>"
-							media="(min-width:768px)" width="336" height="309" />
-
-						<img
-							src="<?php echo get_template_directory_uri() . "/src/images/page-home/restaurant’s-details/mobile/restaurant-mob-7-1x-min.jpg" ?>"
-							width="157" height="201" alt="restaurant7" />
-					</picture>
-				</div>
-
+				}
+				?>
 			</div>
 
 
@@ -404,7 +330,7 @@ Template Name: homePage
 								width="320" height="260" media="(min-width:1440px)" />
 							<source
 								srcset="
-															<?php echo get_template_directory_uri() . "/src/images/page-home/hotel’s-details/tablet/hotel-tabl-2-1x-min.jpg" ?>"
+								<?php echo get_template_directory_uri() . "/src/images/page-home/hotel’s-details/tablet/hotel-tabl-2-1x-min.jpg" ?>"
 								width="176" height="258" media="(min-width:768px)" />
 							<img
 								src="<?php echo get_template_directory_uri() . "/src/images/page-home/hotel’s-details/mobile/hotel-mob-2-1x-min.jpg" ?>" />
@@ -466,10 +392,8 @@ Template Name: homePage
 					<?php the_field("location-title"); ?>
 				</h2>
 
-				<iframe title="our location" class="map"
-					src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d507.40963338157786!2d34.52650989630052!3d49.599223087406706!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40d82601f34ac947%3A0xbb948724f7cf0b61!2sMimino%20Restaurant%20and%20Hotel%20Complex!5e0!3m2!1sen!2sua!4v1677307539401!5m2!1sen!2sua"
-					width="280" height="344" style="border:0;" allowfullscreen="" loading="lazy"
-					referrerpolicy="no-referrer-when-downgrade"></iframe>
+				<?php the_field("location-map"); ?>
+
 
 				<address class="locations-contacts">
 					<div class="location-wrap">

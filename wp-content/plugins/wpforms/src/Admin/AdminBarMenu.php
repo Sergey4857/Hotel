@@ -345,7 +345,7 @@ class AdminBarMenu {
 				continue;
 			}
 
-			/* translators: %d - form ID. */
+			/* translators: %d - Form ID */
 			$form_title = sprintf( esc_html__( 'Form ID: %d', 'wpforms-lite' ), $form_id );
 
 			if ( ! empty( $form['settings'] ) && ! empty( $form['settings']['form_title'] ) ) {

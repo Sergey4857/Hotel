@@ -77,7 +77,6 @@ class Preview {
 	 */
 	public function hooks() {
 
-		add_filter( 'wpforms_frontend_assets_header_force_load', '__return_true' );
 		add_action( 'pre_get_posts', [ $this, 'pre_get_posts' ] );
 		add_filter( 'the_title', [ $this, 'the_title' ], 100, 1 );
 		add_filter( 'the_content', [ $this, 'the_content' ], 999 );
@@ -106,12 +105,6 @@ class Preview {
 		$query->set( 'post_type', 'wpforms' );
 		$query->set( 'post__in', empty( $this->form_data['id'] ) ? [] : [ (int) $this->form_data['id'] ] );
 		$query->set( 'posts_per_page', 1 );
-
-		// The preview page reads as the home page and as an non-singular posts page, neither of which are actually the case.
-		// So we hardcode the correct values for those properties in the query.
-		$query->is_home     = false;
-		$query->is_singular = true;
-		$query->is_single   = true;
 	}
 
 	/**
@@ -126,7 +119,7 @@ class Preview {
 	public function the_title( $title ) {
 
 		if ( in_the_loop() ) {
-			$title = sprintf( /* translators: %s - form name. */
+			$title = sprintf( /* translators: %s - form title. */
 				esc_html__( '%s Preview', 'wpforms-lite' ),
 				! empty( $this->form_data['settings']['form_title'] ) ? sanitize_text_field( $this->form_data['settings']['form_title'] ) : esc_html__( 'Form', 'wpforms-lite' )
 			);
@@ -226,7 +219,7 @@ class Preview {
 					],
 				]
 			),
-			esc_url( wpforms_utm_link( 'https://wpforms.com/docs/how-to-properly-test-your-wordpress-forms-before-launching-checklist/', 'Form Preview', 'Form Testing Tips Documentation' ) )
+			'https://wpforms.com/docs/how-to-properly-test-your-wordpress-forms-before-launching-checklist/'
 		);
 		$content .= '</p>';
 
@@ -264,7 +257,7 @@ class Preview {
 	 */
 	public function smart_tags_process_page_title_value( $content, $form_data, $fields, $entry_id, $smart_tag_object ) {
 
-		return sprintf( /* translators: %s - form name. */
+		return sprintf( /* translators: %s - form title. */
 			esc_html__( '%s Preview', 'wpforms-lite' ),
 			! empty( $form_data['settings']['form_title'] ) ? sanitize_text_field( $form_data['settings']['form_title'] ) : esc_html__( 'Form', 'wpforms-lite' )
 		);

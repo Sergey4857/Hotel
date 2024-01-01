@@ -160,15 +160,8 @@ class Edit {
 			return;
 		}
 
-		$entry_id = isset( $_GET['entry_id'] ) ? absint( $_GET['entry_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
-
-		if ( empty( $entry_id ) ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=wpforms-entries' ) );
-			exit;
-		}
-
 		// Entry processing and setup.
-		add_action( 'wpforms_entries_init', [ $this, 'setup' ] );
+		add_action( 'wpforms_entries_init', [ $this, 'setup' ], 10, 1 );
 
 		do_action( 'wpforms_entries_init', 'edit' );
 
@@ -256,7 +249,7 @@ class Edit {
 		// Frontend form base styles.
 		wp_enqueue_style(
 			'wpforms-base',
-			WPFORMS_PLUGIN_URL . 'assets/css/frontend/classic/wpforms-base.css',
+			WPFORMS_PLUGIN_URL . 'assets/css/wpforms-base.css',
 			[],
 			WPFORMS_VERSION
 		);
@@ -399,6 +392,14 @@ class Edit {
 	 * @since 1.6.0
 	 */
 	public function setup() {
+
+		// No entry ID was provided, abort.
+		if ( empty( $_GET['entry_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$this->abort_message = esc_html__( 'It looks like the provided entry ID isn\'t valid.', 'wpforms' );
+			$this->abort         = true;
+
+			return;
+		}
 
 		// Find the entry.
 		// phpcs:ignore WordPress.Security.NonceVerification
@@ -552,14 +553,11 @@ class Edit {
 		];
 		?>
 
-		<div id="wpforms-entries-single" class="wrap wpforms-admin-wrap wpforms-entries-single-edit">
+		<div id="wpforms-entries-single" class="wrap wpforms-admin-wrap">
 
 			<h1 class="page-title">
 				<?php esc_html_e( 'Edit Entry', 'wpforms' ); ?>
-				<a href="<?php echo esc_url( $view_entry_url ); ?>" class="page-title-action wpforms-btn wpforms-btn-orange">
-					<svg class="page-title-action-icon" viewBox="0 0 13 12"><path d="M12.6 5.2v1.6H3.2l3.1 3.1-.8 1.6L0 6 5.5.5l.8 1.6-3.1 3.1h9.4Z"/></svg>
-					<span class="page-title-action-text"><?php esc_html_e( 'Back to Entry', 'wpforms' ); ?></span>
-				</a>
+				<a href="<?php echo esc_url( $view_entry_url ); ?>" class="add-new-h2 wpforms-btn-orange"><?php esc_html_e( 'Back to Entry', 'wpforms' ); ?></a>
 			</h1>
 
 			<div class="wpforms-admin-content">
@@ -799,7 +797,7 @@ class Edit {
 	 */
 	private function display_edit_form_field_editable( $entry_field, $field, $form_data ) {
 
-		wpforms()->get( 'frontend' )->field_container_open( $field, $form_data );
+		wpforms()->frontend->field_container_open( $field, $form_data );
 
 		$field_object = $this->get_entries_edit_field_object( $field['type'] );
 
@@ -835,11 +833,11 @@ class Edit {
 
 		if ( \wpforms_current_user_can( 'edit_form_single', $this->form_data['id'] ) ) {
 			$edit_url = add_query_arg(
-				[
+				array(
 					'page'    => 'wpforms-builder',
 					'view'    => 'fields',
 					'form_id' => absint( $this->form_data['id'] ),
-				],
+				),
 				admin_url( 'admin.php' )
 			);
 			printf(
@@ -1424,7 +1422,7 @@ class Edit {
 	 */
 	private function add_removed_file_meta( $filename ) {
 
-		/* translators: %s - name of the file that has been deleted. */
+		/* translators: %s - Name of the file that has been deleted. */
 		$this->add_entry_meta( sprintf( esc_html__( 'The uploaded file "%s" has been deleted.', 'wpforms' ), esc_html( $filename ) ) );
 	}
 
@@ -1444,7 +1442,7 @@ class Edit {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
 		$entries = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT `entry_id` FROM $table_name WHERE `fields` LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT `entry_id` FROM {$table_name} WHERE `fields` LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				'%"attachment_id":' . $wpdb->esc_like( $attachment_id ) . ',%'
 			),
 			ARRAY_N

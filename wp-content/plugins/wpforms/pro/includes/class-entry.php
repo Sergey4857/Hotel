@@ -1,8 +1,5 @@
 <?php
 
-// phpcs:ignore Generic.Commenting.DocComment.MissingShort
-/** @noinspection AutoloadingIssuesInspection */
-
 /**
  * Entry DB class.
  *
@@ -122,13 +119,10 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 * @param array $args     Additional arguments.
 	 *
 	 * @return object|null
-	 * @noinspection PhpParameterNameChangedDuringInheritanceInspection
 	 */
 	public function get( $entry_id, $args = [] ) {
 
-		$access = wpforms()->get( 'access' );
-
-		if ( ! isset( $args['cap'] ) && $access && $access->init_allowed() ) {
+		if ( ! isset( $args['cap'] ) && wpforms()->get( 'access' )->init_allowed() ) {
 			$args['cap'] = 'view_entry_single';
 		}
 
@@ -152,7 +146,6 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 * @param array  $args  Additional arguments.
 	 *
 	 * @return bool|null
-	 * @noinspection PhpParameterNameChangedDuringInheritanceInspection
 	 */
 	public function update( $id, $data = [], $where = '', $type = '', $args = [] ) {
 
@@ -178,7 +171,6 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 * @param array $args     Additional arguments.
 	 *
 	 * @return bool False if the record could not be deleted, true otherwise.
-	 * @noinspection PhpParameterNameChangedDuringInheritanceInspection
 	 */
 	public function delete( $entry_id = 0, $args = [] ) {
 
@@ -190,23 +182,14 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			return false;
 		}
 
-		WPForms_Field_File_Upload::delete_uploaded_files_from_entry( $entry_id );
+		\WPForms_Field_File_Upload::delete_uploaded_files_from_entry( $entry_id );
 
-		$entry        = parent::delete( $entry_id );
-		$entry_meta   = wpforms()->get( 'entry_meta' );
-		$entry_fields = wpforms()->get( 'entry_fields' );
-		$meta         = null;
-		$fields       = null;
-
-		if ( $entry_meta ) {
-			$meta = $entry_meta->delete_by( 'entry_id', $entry_id );
-		}
-
-		if ( $entry_fields ) {
-			$fields = $entry_fields->delete_by( 'entry_id', $entry_id );
-		}
+		$entry  = parent::delete( $entry_id );
+		$meta   = wpforms()->entry_meta->delete_by( 'entry_id', $entry_id );
+		$fields = wpforms()->entry_fields->delete_by( 'entry_id', $entry_id );
 
 		WPForms\Pro\Admin\DashboardWidget::clear_widget_cache();
+		WPForms\Pro\Admin\Entries\DefaultScreen::clear_widget_cache();
 
 		return ( $entry && $meta && $fields );
 	}
@@ -215,15 +198,13 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 * Get next entry.
 	 *
 	 * @since 1.1.5
-	 * @since 1.8.3 Added $status parameter.
 	 *
-	 * @param int    $entry_id Entry ID.
-	 * @param int    $form_id  Form ID.
-	 * @param string $status   Entry status.
+	 * @param int $entry_id Entry ID.
+	 * @param int $form_id  Form ID.
 	 *
 	 * @return object|null Object from DB values or null.
 	 */
-	public function get_next( $entry_id, $form_id, $status ) {
+	public function get_next( $entry_id, $form_id ) {
 
 		global $wpdb;
 
@@ -231,43 +212,31 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			return null;
 		}
 
-		// If status is spam, we get the next spam entry. Otherwise, the next non-spam entry with any status.
-		$status_operator = $status === 'spam' ? '=' : '!=';
-
-		// Note: we're disabling InterpolatedNotPrepared sniff because it triggers
-		// a false positive when using operator (= or !=) in the query. The
-		// prepare() method does not support placeholders for operators.
-
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
 		return $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM $this->table_name
+				"SELECT * FROM {$this->table_name}
 				WHERE `form_id` = %d
   				  AND {$this->primary_key} > %d
-  				  AND `status` {$status_operator} 'spam'
 				ORDER BY {$this->primary_key}
 				LIMIT 1;",
 				absint( $form_id ),
 				absint( $entry_id )
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
 	 * Get previous entry.
 	 *
 	 * @since 1.1.5
-	 * @since 1.8.3 Added $status parameter.
 	 *
-	 * @param int    $entry_id Entry ID.
-	 * @param int    $form_id  Form ID.
-	 * @param string $status   Entry status.
+	 * @param int $entry_id Entry ID.
+	 * @param int $form_id  Form ID.
 	 *
 	 * @return object|null Object from DB values or null.
-	 * @noinspection PhpUnused
 	 */
-	public function get_prev( $entry_id, $form_id, $status ) {
+	public function get_prev( $entry_id, $form_id ) {
 
 		global $wpdb;
 
@@ -275,27 +244,18 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			return null;
 		}
 
-		// If status is spam, we get the next spam entry. Otherwise, the next non-spam entry with any status.
-		$status_operator = $status === 'spam' ? '=' : '!=';
-
-		// Note: we're disabling InterpolatedNotPrepared sniff because it triggers
-		// a false positive when using operator (= or !=) in the query. The
-		// prepare() method does not support placeholders for operators.
-
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
 		return $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM $this->table_name
+				"SELECT * FROM {$this->table_name}
 				WHERE `form_id` = %d
 				  AND {$this->primary_key} < %d
-				  AND `status` {$status_operator} 'spam'
 				ORDER BY {$this->primary_key} DESC
 				LIMIT 1;",
 				absint( $form_id ),
 				absint( $entry_id )
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -306,7 +266,6 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 * @param int $form_id Form ID.
 	 *
 	 * @return object|null Object from DB values or null.
-	 * @noinspection PhpUnused
 	 */
 	public function get_last( $form_id ) {
 
@@ -316,18 +275,16 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			return null;
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
 		return $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM $this->table_name
+				"SELECT * FROM {$this->table_name}
 				WHERE `form_id` = %d
-				ORDER BY $this->primary_key DESC
+				ORDER BY {$this->primary_key} DESC
 				LIMIT 1;",
 				(int) $form_id
 			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -338,7 +295,6 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 * @param int $form_id Form ID.
 	 *
 	 * @return bool
-	 * @noinspection PhpUnused
 	 */
 	public function mark_all_read( $form_id = 0 ) {
 
@@ -348,33 +304,20 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			return false;
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
-		$result = $wpdb->query(
-			$wpdb->prepare(
-				"UPDATE $this->table_name SET `viewed` = '1' WHERE `form_id` = %d",
-				(int) $form_id
-			)
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		return (bool) $result; // phpcs:ignore WordPress.DB
+		return (bool) $wpdb->query( $wpdb->prepare( "UPDATE $this->table_name SET `viewed` = '1' WHERE `form_id` = %d", (int) $form_id ) ); // phpcs:ignore WordPress.DB
 	}
 
 	/**
 	 * Get next entries count.
 	 *
 	 * @since 1.5.0
-	 * @since 1.8.3 Added $status parameter.
 	 *
-	 * @param int    $entry_id Entry ID.
-	 * @param int    $form_id  Form ID.
-	 * @param string $status   Entry status.
+	 * @param int $entry_id Entry ID.
+	 * @param int $form_id  Form ID.
 	 *
 	 * @return int
-	 * @noinspection PhpUnused
 	 */
-	public function get_next_count( $entry_id, $form_id, $status ) {
+	public function get_next_count( $entry_id, $form_id ) {
 
 		global $wpdb;
 
@@ -382,25 +325,15 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			return 0;
 		}
 
-		// If status is spam, we get the next spam entry. Otherwise, the next non-spam entry with any status.
-		$status_operator = $status === 'spam' ? '=' : '!=';
-
-		// Note: we're disabling InterpolatedNotPrepared sniff because it triggers
-		// a false positive when using operator (= or !=) in the query. The
-		// prepare() method does not support placeholders for operators.
-
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$prev_count = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT({$this->primary_key}) FROM {$this->table_name}
 				WHERE `form_id` = %d AND {$this->primary_key} > %d
-				AND `status` {$status_operator} 'spam'
 				ORDER BY {$this->primary_key} ASC;",
 				absint( $form_id ),
 				absint( $entry_id )
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return absint( $prev_count );
 	}
@@ -408,18 +341,15 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	/**
 	 * Get previous entries count.
 	 *
-	 * @since 1.1.5
 	 * @since 1.5.0 Changed return type to always be an integer.
-	 * @since 1.8.3 Added $status parameter.
+	 * @since 1.1.5
 	 *
-	 * @param int    $entry_id Entry ID.
-	 * @param int    $form_id  Form ID.
-	 * @param string $status   Entry status.
+	 * @param int $entry_id Entry ID.
+	 * @param int $form_id  Form ID.
 	 *
 	 * @return int
-	 * @noinspection PhpUnused
 	 */
-	public function get_prev_count( $entry_id, $form_id, $status ) {
+	public function get_prev_count( $entry_id, $form_id ) {
 
 		global $wpdb;
 
@@ -427,25 +357,15 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			return 0;
 		}
 
-		// If status is spam, we get the next spam entry. Otherwise, the next non-spam entry with any status.
-		$status_operator = $status === 'spam' ? '=' : '!=';
-
-		// Note: we're disabling InterpolatedNotPrepared sniff because it triggers
-		// a false positive when using operator (= or !=) in the query. The
-		// prepare() method does not support placeholders for operators.
-
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$prev_count = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT({$this->primary_key}) FROM {$this->table_name}
 				WHERE `form_id` = %d AND {$this->primary_key} < %d
-				AND `status` {$status_operator} 'spam'
 				ORDER BY {$this->primary_key} ASC;",
 				absint( $form_id ),
 				absint( $entry_id )
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return absint( $prev_count );
 	}
@@ -500,7 +420,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		 * @param array $args {
 		 *     Entries query arguments.
 		 *
-		 *     @type string  $select        Table field. Possible values: 'all', 'entry_ids'. By default, 'all'.
+		 *     @type string  $select        Table field. Possible values: 'all', 'entry_ids'. By default 'all'.
 		 *     @type integer $number        Number of the entries.
 		 *     @type integer $offset        Offset.
 		 *     @type integer $form_id       Form ID.
@@ -508,7 +428,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		 *     @type bool    $is_filtered   Skip filtering by entry IDs.
 		 *     @type mixed   $post_id       Post ID.
 		 *     @type mixed   $user_id       User ID.
-		 *     @type mixed   $status        Entry status.
+		 *     @type string  $status        Entry status.
 		 *     @type string  $type          Not used, rudimentary key.
 		 *     @type string  $viewed        Viewed flag.
 		 *     @type string  $starred       Starred flag.
@@ -521,7 +441,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		 *                                  Format: `Y-m-d H:i:s`.
 		 *     @type string  $date_modified Modified date. See details for `date`.
 		 *     @type string  $ip_address    IP address.
-		 *     @type string  $notes_count   Notes' count.
+		 *     @type string  $notes_count   Notes count.
 		 *     @type string  $orderby       Order by.
 		 *     @type string  $order         Order: 'ASC' or 'DESC', Default: 'DESC'.
 		 * }
@@ -549,7 +469,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			'wpforms_entry_handler_get_entries_select',
 			[
 				'all'       => '*',
-				'entry_ids' => "$this->table_name.entry_id",
+				'entry_ids' => "{$this->table_name}.entry_id",
 			]
 		);
 
@@ -589,39 +509,15 @@ class WPForms_Entry_Handler extends WPForms_DB {
 				$ids = (int) $args[ $key ];
 			}
 
-			$where[ 'arg_' . $key ] = "$this->table_name.$key IN ( $ids )";
+			$where[ 'arg_' . $key ] = "{$this->table_name}.{$key} IN ( {$ids} )";
 		}
 
 		// Allowed string arg items.
-		foreach ( [ 'type', 'user_uuid' ] as $key ) {
+		foreach ( [ 'status', 'type', 'user_uuid' ] as $key ) {
 
 			if ( $args[ $key ] !== '' ) {
-				$where[ 'arg_' . $key ] = "$this->table_name.$key = '" . esc_sql( $args[ $key ] ) . "'";
+				$where[ 'arg_' . $key ] = "{$this->table_name}.{$key} = '" . esc_sql( $args[ $key ] ) . "'";
 			}
-		}
-
-		// Process status.
-		if ( ! empty( $args['status'] ) ) {
-
-			$status = $args['status'];
-
-			if ( ! is_array( $status ) ) {
-				$status = [ $status ];
-			}
-
-			// Sanitize and escape.
-			$status = array_map( 'esc_sql', array_map( 'sanitize_text_field', $status ) );
-
-			// Filter empty and duplicate values.
-			$status = array_unique( array_filter( $status ) );
-
-			if ( ! empty( $status ) ) {
-				$status = implode( "','", $status );
-
-				$where['arg_status'] = "{$this->table_name}.status IN ( '{$status}' )";
-			}
-		} else {
-			$where['arg_status'] = "{$this->table_name}.status != 'spam'";
 		}
 
 		// Process dates.
@@ -637,8 +533,8 @@ class WPForms_Entry_Handler extends WPForms_DB {
 				$date_end   = wpforms_get_day_period_date( 'end_of_day', strtotime( $args[ $key ][1] ), 'Y-m-d H:i:s', true );
 
 				if ( ! empty( $date_start ) && ! empty( $date_end ) ) {
-					$where[ 'arg_' . $key . '_start' ] = "$this->table_name.$key >= '$date_start'";
-					$where[ 'arg_' . $key . '_end' ]   = "$this->table_name.$key <= '$date_end'";
+					$where[ 'arg_' . $key . '_start' ] = "{$this->table_name}.{$key} >= '{$date_start}'";
+					$where[ 'arg_' . $key . '_end' ]   = "{$this->table_name}.{$key} <= '{$date_end}'";
 				}
 			} elseif ( is_string( $args[ $key ] ) ) {
 				/*
@@ -651,8 +547,8 @@ class WPForms_Entry_Handler extends WPForms_DB {
 				$date_end   = wpforms_get_day_period_date( 'end_of_day', $timestamp, 'Y-m-d H:i:s', true );
 
 				if ( ! empty( $date_start ) && ! empty( $date_end ) ) {
-					$where[ 'arg_' . $key . '_start' ] = "$this->table_name.$key >= '$date_start'";
-					$where[ 'arg_' . $key . '_end' ]   = "$this->table_name.$key <= '$date_end'";
+					$where[ 'arg_' . $key . '_start' ] = "{$this->table_name}.{$key} >= '{$date_start}'";
+					$where[ 'arg_' . $key . '_end' ]   = "{$this->table_name}.{$key} <= '{$date_end}'";
 				}
 			}
 		}
@@ -667,7 +563,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		 */
 		if ( $args['orderby'] !== 'payment_total' ) {
 			$args['orderby'] = ! array_key_exists( $args['orderby'], $this->get_columns() ) ? $this->primary_key : $args['orderby'];
-			$args['orderby'] = "$this->table_name.{$args['orderby']}";
+			$args['orderby'] = "{$this->table_name}.{$args['orderby']}";
 		}
 
 		if ( 'ASC' === strtoupper( $args['order'] ) ) {
@@ -684,7 +580,6 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		if ( $args['number'] < 1 ) {
 			$args['number'] = PHP_INT_MAX;
 		}
-
 		$args['number'] = absint( $args['number'] );
 
 		/*
@@ -693,17 +588,17 @@ class WPForms_Entry_Handler extends WPForms_DB {
 
 		$sql_from = $this->table_name;
 
-		// Add a LEFT OUTER JOIN for retrieve a notes' count.
+		// Add a LEFT OUTER JOIN for retrieve a notes count.
 		if ( $args['notes_count'] ) {
 			$sql_from .= ' LEFT JOIN';
-			$sql_from .= " ( SELECT $meta_table.entry_id AS meta_entry_id, COUNT( $meta_table.id ) AS notes_count";
-			$sql_from .= " FROM $meta_table";
-			$sql_from .= " WHERE $meta_table.type = 'note'";
+			$sql_from .= " ( SELECT {$meta_table}.entry_id AS meta_entry_id, COUNT({$meta_table}.id) AS notes_count";
+			$sql_from .= " FROM {$meta_table}";
+			$sql_from .= " WHERE {$meta_table}.type = 'note'";
 			$sql_from .= ' GROUP BY meta_entry_id )';
-			$sql_from .= " notes_counts ON notes_counts.meta_entry_id = $this->table_name.entry_id";
+			$sql_from .= " notes_counts ON notes_counts.meta_entry_id = {$this->table_name}.entry_id";
 
-			// Changed the ORDER BY - notes' count sorting support.
-			if ( $args['orderby'] === "$this->table_name.notes_count" ) {
+			// Changed the ORDER BY - notes count sorting support.
+			if ( $args['orderby'] === "{$this->table_name}.notes_count" ) {
 				$args['orderby'] = 'notes_counts.notes_count';
 			}
 		}
@@ -734,7 +629,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		 *
 		 * @since 1.4.4
 		 *
-		 * @param array $where The array of the WHERE clause chunks. Each chunk will be added to the SQL query using AND logical operator.
+		 * @param array $where The array of the chunks of the WHERE clause. Each chunk will be added to the SQL query using AND logical operator.
 		 * @param array $args  Entries query arguments (arguments of the \WPForms_Entry_Handler::`get_entries( $args )` method).
 		 */
 		$where     = (array) apply_filters( 'wpforms_entry_handler_get_entries_where', $where, $args );
@@ -744,18 +639,18 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			return absint(
 				// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$wpdb->get_var(
-					"SELECT COUNT( $this->table_name.$this->primary_key )
-					FROM $sql_from
-					WHERE $where_sql;"
+					"SELECT COUNT({$this->table_name}.{$this->primary_key})
+					FROM {$sql_from}
+					WHERE {$where_sql};"
 				)
 				// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			);
 		}
 
 		$sql = "
-			SELECT $select
-			FROM $sql_from
-			WHERE $where_sql
+			SELECT {$select}
+			FROM {$sql_from}
+			WHERE {$where_sql}
 			ORDER BY {$args['orderby']} {$args['order']}
 			LIMIT {$args['offset']}, {$args['number']}
 		";
@@ -771,7 +666,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 *
 	 * @since 1.6.9
 	 *
-	 * @param array $args  Arguments of the main `get_entries()` method.
+	 * @param array $args  Arguments of main `get_entries()` method.
 	 * @param array $where Main `get_entries()` query WHERE array.
 	 *
 	 * @return array Updated WHERE array needed to perform main get_entries() query.
@@ -800,39 +695,38 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			)
 		) {
 			$fields_table     = wpforms()->get( 'entry_fields' )->table_name;
-			$second_sql_from .= " JOIN $fields_table ON $this->table_name.`entry_id` = $fields_table.`entry_id`";
+			$second_sql_from .= " JOIN {$fields_table} ON {$this->table_name}.`entry_id` = {$fields_table}.`entry_id`";
 		}
 
 		$second_sql = "
-			SELECT $this->table_name.`entry_id`
-			FROM $second_sql_from
-			WHERE $second_where_sql
+			SELECT {$this->table_name}.`entry_id`
+			FROM {$second_sql_from}
+			WHERE {$second_where_sql}
 			GROUP BY `entry_id`
 		";
 
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
-		$second_result    = $wpdb->get_results( $second_sql );
+		$second_result    = $wpdb->get_results( $second_sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 		$second_entry_ids = ! empty( $second_result ) ? wp_list_pluck( $second_result, 'entry_id' ) : [];
 
 		if ( empty( $second_entry_ids ) ) {
-			$where['arg_entry_id'] = "$this->table_name.`entry_id` IN ( 0 )";
+			$where['arg_entry_id'] = "{$this->table_name}.`entry_id` IN ( 0 )";
 
 			return $where;
 		}
 
 		$ids = array_map( 'intval', (array) $args['entry_id'] );
 
-		// `Any form field does not contain` and `Any form field is not` are special cases.
+		// `Any form field does not contains` and `Any form field is not` is a special cases.
 		$any_field_not = empty( $args['advanced_search'] ) &&
 						 ( empty( $args['field_id'] ) || $args['field_id'] === 'any' ) &&
 						 in_array( $args['value_compare'], [ 'is_not', 'contains_not' ], true );
 
 		if (
-			$any_field_not ||
 			! empty( $args['advanced_search'] ) ||
-			in_array( $args['value_compare'], [ 'is', 'contains' ], true )
+			in_array( $args['value_compare'], [ 'is', 'contains' ], true ) ||
+			$any_field_not
 		) {
 			$ids = array_merge( $ids, $second_entry_ids );
 		} else {
@@ -843,7 +737,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		$ids = empty( $ids ) ? [ 0 ] : $ids;
 		$ids = implode( ',', array_map( 'intval', $ids ) );
 
-		$where['arg_entry_id'] = "$this->table_name.`entry_id` IN ($ids)";
+		$where['arg_entry_id'] = "{$this->table_name}.`entry_id` IN ({$ids})";
 
 		return $where;
 	}
@@ -853,7 +747,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 *
 	 * @since 1.6.9
 	 *
-	 * @param array $args Arguments of the main `get_entries()` method.
+	 * @param array $args Arguments of main `get_entries()` method.
 	 *
 	 * @return array Updated WHERE array.
 	 */
@@ -867,14 +761,10 @@ class WPForms_Entry_Handler extends WPForms_DB {
 
 		if ( empty( $args['advanced_search'] ) && is_numeric( $args['field_id'] ) ) {
 			$args['field_id']             = (int) $args['field_id'];
-			$second_where['arg_field_id'] = "$fields_table.field_id = '{$args['field_id']}'";
+			$second_where['arg_field_id'] = "{$fields_table}.field_id = '{$args['field_id']}'";
 		}
 
-		if (
-			! isset( $args['value'] ) ||
-			wpforms_is_empty_string( $args['value'] ) ||
-			in_array( $args['value_compare'], [ 'is', 'contains' ], true )
-		) {
+		if ( ! isset( $args['value'] ) || wpforms_is_empty_string( $args['value'] ) || in_array( $args['value_compare'], [ 'is', 'contains' ], true ) ) {
 			return $second_where;
 		}
 
@@ -888,17 +778,17 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			}
 
 			$escaped_value   = esc_sql( $args['value'] );
-			$condition_value = $args['value_compare'] === 'is_not' ? " = '$escaped_value'" : " LIKE '%$escaped_value%'";
+			$condition_value = $args['value_compare'] === 'is_not' ? " = '{$escaped_value}'" : " LIKE '%{$escaped_value}%'";
 			$form_ids        = implode( ',', array_map( 'intval', (array) $args['form_id'] ) );
 			$form_ids_where  = ! empty( $form_ids ) ? "AND `form_id` IN ( $form_ids )" : '';
 
 			if ( wpforms_is_empty_string( $escaped_value ) ) {
 
-				$second_where['fields_entry_not_in'] = "$this->table_name.`entry_id` NOT IN ( 0 )";
+				$second_where['fields_entry_not_in'] = "{$this->table_name}.`entry_id` NOT IN ( 0 )";
 
 			} else {
 
-				$second_where['fields_entry_not_in'] = "$this->table_name.`entry_id` NOT IN (
+				$second_where['fields_entry_not_in'] = "{$this->table_name}.`entry_id` NOT IN (
 					SELECT `entry_id`
 					FROM {$fields_table}
 					WHERE
@@ -915,7 +805,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 
 		if ( $args['advanced_search'] === 'entry_notes' ) {
 			$entry_ids                         = $this->second_query_where_entry_notes_or_payment_details_result_ids( $args );
-			$second_where['meta_entry_not_in'] = "$this->table_name.`entry_id` NOT IN ( $entry_ids )";
+			$second_where['meta_entry_not_in'] = "{$this->table_name}.`entry_id` NOT IN ( {$entry_ids} )";
 		}
 
 		return $second_where;
@@ -940,9 +830,9 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			return $this->second_query_where_arg_value_not_empty( $args );
 		}
 
-		// If the sanitized search term is empty, we should return nothing in the case of direct logic.
+		// If the sanitized search term is empty we should return nothing in the case of direct logic.
 		if ( in_array( $args['value_compare'], [ 'is', 'contains' ], true ) ) {
-			return "$this->table_name.`entry_id` IN ( 0 )";
+			return "{$this->table_name}.`entry_id` IN ( 0 )";
 		}
 
 		return '';
@@ -965,7 +855,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		if ( empty( $args['advanced_search'] ) ) {
 			$fields_table = wpforms()->get( 'entry_fields' )->table_name;
 
-			return "$fields_table.`value` $condition_value";
+			return "{$fields_table}.`value` {$condition_value}";
 		}
 
 		// In the case of searching the `entry_id` with `is` or `is_not` we should prepare the value and generate different WHERE part.
@@ -984,7 +874,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 *
 	 * @since 1.6.9
 	 *
-	 * @param array  $args            Arguments of the main `get_entries()` method.
+	 * @param array  $args            Arguments of main `get_entries()` method.
 	 * @param string $condition_value Condition with escaped value.
 	 *
 	 * @return string
@@ -996,15 +886,15 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		}
 
 		if ( $args['advanced_search'] === 'entry_id' ) {
-			return "$this->table_name.`entry_id` $condition_value";
+			return "{$this->table_name}.`entry_id` {$condition_value}";
 		}
 
 		if ( $args['advanced_search'] === 'ip_address' ) {
-			return "$this->table_name.`ip_address` $condition_value";
+			return "{$this->table_name}.`ip_address` {$condition_value}";
 		}
 
 		if ( $args['advanced_search'] === 'user_agent' ) {
-			return "$this->table_name.`user_agent` $condition_value";
+			return "{$this->table_name}.`user_agent` {$condition_value}";
 		}
 
 		if ( ! in_array( $args['advanced_search'], [ 'entry_notes', 'payment_details' ], true ) ) {
@@ -1017,7 +907,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		) {
 			$entry_ids = $this->second_query_where_entry_notes_or_payment_details_result_ids( $args );
 
-			return "$this->table_name.`entry_id` IN ( $entry_ids )";
+			return "{$this->table_name}.`entry_id` IN ( {$entry_ids} )";
 		}
 
 		return '';
@@ -1028,7 +918,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 *
 	 * @since 1.6.9
 	 *
-	 * @param array $args Arguments of the main `get_entries()` method.
+	 * @param array $args Arguments of main `get_entries()` method.
 	 *
 	 * @return string
 	 */
@@ -1053,7 +943,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 
 		$operator = $value_compare === 'is' ? 'IN' : 'NOT IN';
 
-		return "$this->table_name.`entry_id` $operator ( $escaped_value )";
+		return "{$this->table_name}.`entry_id` {$operator} ( {$escaped_value} )";
 	}
 
 	/**
@@ -1113,17 +1003,17 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		$meta_table     = wpforms()->get( 'entry_meta' )->table_name;
 		$escaped_value  = strtolower( esc_sql( $args['value'] ) );
 		$data           = str_replace( [ '  ', ' ' ], [ ' ', '%' ], $escaped_value );
-		$data           = "AND data LIKE '%$data%'";
+		$data           = "AND data LIKE '%{$data}%'";
 		$form_ids_where = ! empty( $form_ids ) ? "AND form_id IN ( $form_ids )" : '';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$notes = $wpdb->get_results(
 			"SELECT entry_id, data
-			FROM $meta_table
+			FROM {$meta_table}
 			WHERE
 				type = 'note'
 				$data
-				$form_ids_where"
+				{$form_ids_where}"
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
@@ -1211,10 +1101,10 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		$charset_collate = '';
 
 		if ( ! empty( $wpdb->charset ) ) {
-			$charset_collate .= "DEFAULT CHARACTER SET $wpdb->charset";
+			$charset_collate .= "DEFAULT CHARACTER SET {$wpdb->charset}";
 		}
 		if ( ! empty( $wpdb->collate ) ) {
-			$charset_collate .= " COLLATE $wpdb->collate";
+			$charset_collate .= " COLLATE {$wpdb->collate}";
 		}
 
 		$sql = "CREATE TABLE IF NOT EXISTS {$this->table_name} (
@@ -1241,7 +1131,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	}
 
 	/**
-	 * Get entries' count per page.
+	 * Get entries count per page.
 	 *
 	 * @since 1.6.5
 	 *
@@ -1249,16 +1139,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	 */
 	public function get_count_per_page() {
 
-		// phpcs:disable WPForms.PHP.ValidateHooks.InvalidHookName
-		/**
-		 * Give developers an ability to modify number of entries per page.
-		 *
-		 * @since 1.6.5
-		 *
-		 * @param array $count Entries' count per page.
-		 */
 		return (int) apply_filters( 'wpforms_entries_per_page', 30 );
-		// phpcs:enable WPForms.PHP.ValidateHooks.InvalidHookName
 	}
 
 	/**
@@ -1278,8 +1159,7 @@ class WPForms_Entry_Handler extends WPForms_DB {
 			return false;
 		}
 
-		$form      = wpforms()->get( 'form' );
-		$form_data = $form ? $form->get( (int) $entry->form_id, [ 'content_only' => true ] ) : null;
+		$form_data = wpforms()->get( 'form' )->get( (int) $entry->form_id, [ 'content_only' => true ] );
 
 		if ( ! is_array( $form_data ) || empty( $form_data['fields'] ) ) {
 			return false;
@@ -1287,7 +1167,6 @@ class WPForms_Entry_Handler extends WPForms_DB {
 
 		foreach ( $form_data['fields'] as $id => $form_field ) {
 
-			// phpcs:disable WPForms.PHP.ValidateHooks.InvalidHookName
 			/** This filter is documented in src/Pro/Admin/Entries/Edit.php */
 			$is_editable = (bool) apply_filters(
 				'wpforms_pro_admin_entries_edit_field_output_editable',
@@ -1296,7 +1175,6 @@ class WPForms_Entry_Handler extends WPForms_DB {
 				$entry_fields,
 				$form_data
 			);
-			// phpcs:enable WPForms.PHP.ValidateHooks.InvalidHookName
 
 			if ( ! $is_editable ) {
 				unset( $form_data['fields'][ $id ] );
@@ -1319,10 +1197,8 @@ class WPForms_Entry_Handler extends WPForms_DB {
 
 		$editable = in_array( $type, $this->get_editable_field_types(), true );
 
-		// phpcs:disable WPForms.PHP.ValidateHooks.InvalidHookName
 		/** This filter is documented in src/Pro/Admin/Entries/Edit.php */
 		return (bool) apply_filters( 'wpforms_pro_admin_entries_edit_field_editable', $editable, $type );
-		// phpcs:enable WPForms.PHP.ValidateHooks.InvalidHookName
 	}
 
 	/**
@@ -1347,9 +1223,6 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		}
 
 		$values = [];
-
-		// @todo: Remove after deprecate this method and all payment addons updated to be compatible with 1.8.2.
-		$this->insert_legacy_payment( $wpforms_entry, $payment_data );
 
 		foreach ( $payment_data as $meta_key => $meta_value ) {
 			// If meta_key doesn't begin with `payment_`, prefix it.
@@ -1383,78 +1256,6 @@ class WPForms_Entry_Handler extends WPForms_DB {
 	}
 
 	/**
-	 * Create payment when legacy payment addon is used.
-	 *
-	 * @since 1.8.2
-	 *
-	 * @param object $entry        Entry.
-	 * @param array  $payment_meta Payment meta.
-	 */
-	private function insert_legacy_payment( $entry, $payment_meta ) {  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
-
-		$required_keys = [ 'payment_total', 'payment_currency', 'payment_type' ];
-
-		if ( 0 !== count( array_diff( $required_keys, array_keys( $payment_meta ) ) ) ) {
-			return;
-		}
-
-		$is_subscription = ! empty( $payment_meta['payment_subscription'] );
-
-		$payment_data = [
-			'form_id'             => absint( $entry->form_id ),
-			'status'              => strtolower( $entry->status ),
-			'subtotal_amount'     => $payment_meta['payment_total'],
-			'total_amount'        => $payment_meta['payment_total'],
-			'currency'            => $payment_meta['payment_currency'],
-			'entry_id'            => absint( $entry->entry_id ),
-			'gateway'             => $payment_meta['payment_type'],
-			'type'                => $is_subscription ? 'subscription' : 'one-time',
-			'mode'                => isset( $payment_meta['payment_mode'] ) && $payment_meta['payment_mode'] !== 'test' ? 'live' : 'test',
-			'transaction_id'      => isset( $payment_meta['payment_transaction'] ) ? substr( $payment_meta['payment_transaction'], 0, 40 ) : '',
-			'customer_id'         => isset( $payment_meta['payment_customer'] ) ? substr( $payment_meta['payment_customer'], 0, 40 ) : '',
-			'subscription_id'     => $is_subscription ? substr( $payment_meta['payment_subscription'], 0, 40 ) : '',
-			'subscription_status' => $is_subscription ? strtolower( $entry->status ) : '',
-			'date_created_gmt'    => $entry->date,
-			'date_updated_gmt'    => $entry->date_modified,
-		];
-
-		if ( strtolower( $payment_data['status'] ) === 'completed' ) {
-			$payment_data['status'] = 'processed';
-		}
-
-		if ( in_array( strtolower( $payment_data['subscription_status'] ), [ 'active', 'completed' ], true ) ) {
-			$payment_data['subscription_status'] = 'not-synced';
-			$payment_data['status']              = 'processed';
-		}
-
-		// Create payment.
-		$payment    = wpforms()->get( 'payment' );
-		$payment_id = $payment ? $payment->add( $payment_data ) : null;
-
-		if ( ! $payment_id ) {
-			return;
-		}
-
-		$payment_meta = [
-			'subscription_period' => $is_subscription ? $payment_meta['payment_period'] : '',
-			'payment_note'        => isset( $payment_meta['payment_note'] ) ? $payment_meta['payment_note'] : '',
-			'payment_recipient'   => isset( $payment_meta['payment_recipient'] ) ? $payment_meta['payment_recipient'] : '',
-			'receipt_number'      => isset( $payment_meta['receipt_number'] ) ? $payment_meta['receipt_number'] : '',
-			'user_id'             => $entry->user_id,
-			'user_agent'          => $entry->user_agent,
-			'user_uuid'           => $entry->user_uuid,
-			'ip_address'          => $entry->ip_address,
-		];
-
-		// Insert payment meta.
-		$payment_meta_object = wpforms()->get( 'payment_meta' );
-
-		if ( $payment_meta_object ) {
-			$payment_meta_object->bulk_add( $payment_id, $payment_meta );
-		}
-	}
-
-	/**
 	 * Get condition value.
 	 *
 	 * @since 1.7.5
@@ -1468,10 +1269,10 @@ class WPForms_Entry_Handler extends WPForms_DB {
 		$escaped_value = esc_sql( $args['value'] );
 
 		$condition_values = [
-			'is'           => " = '$escaped_value'",
-			'is_not'       => " <> '$escaped_value'",
-			'contains'     => " LIKE '%$escaped_value%'",
-			'contains_not' => " NOT LIKE '%$escaped_value%'",
+			'is'           => " = '{$escaped_value}'",
+			'is_not'       => " <> '{$escaped_value}'",
+			'contains'     => " LIKE '%{$escaped_value}%'",
+			'contains_not' => " NOT LIKE '%{$escaped_value}%'",
 		];
 
 		$value_compare = empty( $args['value_compare'] ) ? 'is' : $args['value_compare'];

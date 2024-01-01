@@ -138,9 +138,8 @@ class Transient {
 
 		$timeout = self::get_timeout( $transient );
 
-		if ( $timeout !== false ) {
+		if ( false !== $timeout ) {
 			update_option( $transient_timeout, time() + $expiration );
-
 			return update_option( $transient_option, $value );
 		}
 
@@ -185,7 +184,7 @@ class Transient {
 
 		return $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
-				"DELETE FROM $wpdb->options
+				"DELETE FROM {$wpdb->options}
 				WHERE option_name LIKE %s",
 				$wpdb->esc_like( self::OPTION_PREFIX ) . '%'
 			)
@@ -196,7 +195,7 @@ class Transient {
 	 * Delete all expired WPForms transients.
 	 *
 	 * The multi-table delete syntax is used to delete the transient record
-	 * from table 'a', and the corresponding transient_timeout record from table 'b'.
+	 * from table a, and the corresponding transient_timeout record from table b.
 	 *
 	 * @since 1.6.3.1
 	 *
@@ -208,7 +207,7 @@ class Transient {
 
 		return $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
-				"DELETE a, b FROM $wpdb->options a, $wpdb->options b
+				"DELETE a, b FROM {$wpdb->options} a, {$wpdb->options} b
 				WHERE a.option_name LIKE %s
 				AND a.option_name NOT LIKE %s
 				AND b.option_name = CONCAT( %s, SUBSTRING( a.option_name, %d ) )
@@ -236,7 +235,7 @@ class Transient {
 		$timeout = self::get_timeout( $transient );
 
 		// If there's no timeout data found, the transient is considered to be valid.
-		if ( $timeout === false ) {
+		if ( false === $timeout ) {
 			return false;
 		}
 

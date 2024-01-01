@@ -1,7 +1,6 @@
 <?php
 
 use WPForms\Helpers\Transient;
-use WPForms\Admin\Notice;
 
 /**
  * License key fun.
@@ -35,21 +34,15 @@ class WPForms_License {
 	 */
 	public function __construct() {
 
-		$this->hooks();
-	}
-
-	/**
-	 * Register hooks.
-	 *
-	 * @since 1.8.1.2
-	 */
-	public function hooks() {
-
 		// Admin notices.
-		add_action( 'admin_notices', [ $this, 'notices' ] );
+		if ( wpforms()->is_pro() && ( ! isset( $_GET['page'] ) || $_GET['page'] !== 'wpforms-settings' ) ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
+			add_action( 'admin_notices', [ $this, 'notices' ] );
+		}
 
 		// Periodic background license check.
-		$this->maybe_validate_key();
+		if ( $this->get() ) {
+			$this->maybe_validate_key();
+		}
 	}
 
 	/**
@@ -61,7 +54,15 @@ class WPForms_License {
 	 */
 	public function get() {
 
-		return wpforms_get_license_key();
+		// Check for license key.
+		$key = wpforms_setting( 'key', '', 'wpforms_license' );
+
+		// Allow wp-config constant to pass key.
+		if ( empty( $key ) && defined( 'WPFORMS_LICENSE_KEY' ) ) {
+			$key = WPFORMS_LICENSE_KEY;
+		}
+
+		return $key;
 	}
 
 	/**
@@ -73,17 +74,13 @@ class WPForms_License {
 	 */
 	public function get_key_location() {
 
-		$key = wpforms_setting( 'key', '', 'wpforms_license' );
-
-		if ( ! empty( $key ) ) {
-			return 'option';
-		}
-
-		if ( defined( 'WPFORMS_LICENSE_KEY' ) && WPFORMS_LICENSE_KEY ) {
+		if ( defined( 'WPFORMS_LICENSE_KEY' ) ) {
 			return 'constant';
 		}
 
-		return 'missing';
+		$key = wpforms_setting( 'key', '', 'wpforms_license' );
+
+		return ! empty( $key ) ? 'option' : 'missing';
 	}
 
 	/**
@@ -191,9 +188,6 @@ class WPForms_License {
 		$key = $this->get();
 
 		if ( ! $key ) {
-			// Flush timestamp interval when key is missing or not available.
-			delete_option( 'wpforms_license_updates' );
-
 			return;
 		}
 
@@ -229,7 +223,7 @@ class WPForms_License {
 	 */
 	public function validate_key( $key = '', $forced = false, $ajax = false, $return_status = false ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
 
-		$validate = $this->perform_remote_request( 'validate-key', [ 'tgm-updater-key' => $key ] );
+		$validate = $this->perform_remote_request( 'validate-key', array( 'tgm-updater-key' => $key ) );
 
 		// If there was a basic API error in validation, only set the transient for 10 minutes before retrying.
 		if ( ! $validate ) {
@@ -291,19 +285,18 @@ class WPForms_License {
 		$option['is_expired']  = false;
 		$option['is_disabled'] = false;
 		$option['is_invalid']  = false;
-
 		update_option( 'wpforms_license', $option );
 
-		// If forced, set a contextual success message.
+		// If forced, set contextual success message.
 		if ( $forced ) {
 			$msg             = esc_html__( 'Your key has been refreshed successfully.', 'wpforms' );
 			$this->success[] = $msg;
 			if ( $ajax ) {
 				wp_send_json_success(
-					[
+					array(
 						'type' => $option['type'],
 						'msg'  => $msg,
-					]
+					)
 				);
 			}
 		}
@@ -335,86 +328,42 @@ class WPForms_License {
 			$msg = esc_html__( 'There was an error connecting to the remote key API. Please try again later.', 'wpforms' );
 
 			if ( $ajax ) {
-				wp_send_json_error(
-					[
-						'msg' => $msg,
-					]
-				);
+				wp_send_json_error( $msg );
+			} else {
+				$this->errors[] = $msg;
+
+				return;
 			}
-
-			$this->errors[] = $msg;
-
-			return;
 		}
-
-		$success_message = esc_html__( 'You have deactivated the key from this site successfully.', 'wpforms' );
 
 		// If an error is returned, set the error and return.
 		if ( ! empty( $deactivate->error ) ) {
-
-			// If the license key is invalid, delete the option to ensure the user doesn't get stuck with a filled input.
-			// Doing this here will ensure that the connection to the server is already established successfully.
-			if ( $this->get_errors() ) {
-				$this->remove_key();
-			}
-
 			if ( $ajax ) {
-				$has_key = ! empty( $this->get() );
+				wp_send_json_error( $deactivate->error );
+			} else {
+				$this->errors[] = $deactivate->error;
 
-				if ( $has_key ) {
-					wp_send_json_error(
-						[
-							'info' => $this->get_info_message_escaped(),
-							'msg'  => $deactivate->error,
-						]
-					);
-				}
-
-				wp_send_json_success(
-					[
-						'info' => $this->get_info_message_escaped(),
-						'msg'  => $success_message,
-					]
-				);
+				return;
 			}
-
-			$this->errors[] = $deactivate->error;
-
-			return;
 		}
 
 		// Otherwise, user's license has been deactivated successfully, reset the option and set the success message.
-		$success         = isset( $deactivate->success ) ? $deactivate->success : $success_message;
+		$success         = isset( $deactivate->success ) ? $deactivate->success : esc_html__( 'You have deactivated the key from this site successfully.', 'wpforms' );
 		$this->success[] = $success;
 
-		$this->remove_key();
+		update_option( 'wpforms_license', '' );
+
+		$this->clear_cache();
 
 		if ( $ajax ) {
-			wp_send_json_success(
-				[
-					'info' => $this->get_info_message_escaped(),
-					'msg'  => $success,
-				]
-			);
+			wp_send_json_success( $success );
 		}
-	}
-
-	/**
-	 * Empty out the license key option and flush the cache.
-	 *
-	 * @since 1.8.0
-	 */
-	private function remove_key() {
-
-		update_option( 'wpforms_license', '' );
-		$this->clear_cache();
 	}
 
 	/**
 	 * Return possible license key error flag.
 	 *
 	 * @since 1.0.0
-	 *
 	 * @return bool True if there are license key errors, false otherwise.
 	 */
 	public function get_errors() {
@@ -425,56 +374,6 @@ class WPForms_License {
 	}
 
 	/**
-	 * Return license key message if applicable.
-	 *
-	 * @since 1.7.9
-	 *
-	 * @return string Returns proper info (error) message depending on the state of the license.
-	 */
-	public function get_info_message_escaped() {
-
-		if ( ! $this->get() ) {
-			return sprintf(
-				wp_kses( /* translators: %1$s - WPForms.com Account dashboard URL, %2$s - WPForms.com pricing URL. */
-					__( 'Your license key can be found in your <a href="%1$s" target="_blank" rel="noopener noreferrer">WPForms Account Dashboard</a>. Don’t have a license? <a href="%2$s" target="_blank" rel="noopener noreferrer">Sign up today!</a>', 'wpforms' ),
-					[
-						'a' => [
-							'href'   => [],
-							'target' => [],
-							'rel'    => [],
-						],
-					]
-				),
-				wpforms_utm_link( 'https://wpforms.com/account/', 'settings-license', 'Account Dashboard' ),
-				wpforms_utm_link( 'https://wpforms.com/pricing/', 'settings-license', 'License Key Sign Up' )
-			);
-		}
-
-		if ( $this->is_expired() ) {
-			return wp_kses(
-				__( '<strong>Your license has expired.</strong> An active license is needed to create new forms and edit existing forms. It also provides access to new features & addons, plugin updates (including security improvements), and our world class support!', 'wpforms' ),
-				[ 'strong' => [] ]
-			);
-		}
-
-		if ( $this->is_disabled() ) {
-			return wp_kses(
-				__( '<strong>Your license key has been disabled.</strong> Please use a different key to continue receiving automatic updates.', 'wpforms' ),
-				[ 'strong' => [] ]
-			);
-		}
-
-		if ( $this->is_invalid() ) {
-			return wp_kses(
-				__( '<strong>Your license key is invalid.</strong> The key no longer exists or the user associated with the key has been deleted. Please use a different key to continue receiving automatic updates.', 'wpforms' ),
-				[ 'strong' => [] ]
-			);
-		}
-
-		return '';
-	}
-
-	/**
 	 * Output any notices generated by the class.
 	 *
 	 * @since 1.0.0
@@ -482,11 +381,6 @@ class WPForms_License {
 	 * @param bool $below_h2 Whether to display a notice below H2.
 	 */
 	public function notices( $below_h2 = false ) {
-
-		// Do not display notices if the user does not have permission or is on the settings page.
-		if ( ! wpforms_current_user_can() || wpforms_is_admin_page( 'settings' ) ) {
-			return;
-		}
 
 		// Grab the option and output any nag dealing with license keys.
 		$key    = $this->get();
@@ -508,112 +402,80 @@ class WPForms_License {
 				esc_url( add_query_arg( [ 'page' => 'wpforms-settings' ], admin_url( 'admin.php' ) ) )
 			);
 
-			Notice::info(
+			\WPForms\Admin\Notice::info(
 				$notice,
 				[ 'class' => $class ]
 			);
-
-			return; // Bail early, there is no point in going through the rest of the conditional statements, as the key is already missing.
 		}
-
-		// Set the renew now url.
-		$renew_now_url = add_query_arg(
-			[
-				'utm_source'   => 'WordPress',
-				'utm_medium'   => 'Admin Notice',
-				'utm_campaign' => 'plugin',
-				'utm_content'  => 'Renew Now',
-			],
-			'https://wpforms.com/account/licenses/'
-		);
-
-		// Set the learn more url.
-		$learn_more_url = add_query_arg(
-			[
-				'utm_source'   => 'WordPress',
-				'utm_medium'   => 'Admin Notice',
-				'utm_campaign' => 'plugin',
-				'utm_content'  => 'Learn More',
-			],
-			'https://wpforms.com/docs/how-to-renew-your-wpforms-license/'
-		);
 
 		// If a key has expired, output nag about renewing the key.
 		if ( isset( $option['is_expired'] ) && $option['is_expired'] ) :
 
-				$notice = sprintf(
-					'<h3 style="margin: .75em 0 0 0;">
-						<img src="%1$s" style="vertical-align: text-top; width: 20px; margin-right: 7px;">%2$s
-					</h3>
-					<p>%3$s</p>
-					<p>
-						<a href="%4$s" class="button-primary">%5$s</a> &nbsp
-						<a href="%6$s" class="button-secondary">%7$s</a>
-					</p>',
-					esc_url( WPFORMS_PLUGIN_URL . 'assets/images/exclamation-triangle.svg' ),
-					esc_html__( 'Heads up! Your WPForms license has expired.', 'wpforms' ),
-					esc_html__( 'An active license is needed to create new forms and edit existing forms. It also provides access to new features & addons, plugin updates (including security improvements), and our world class support!', 'wpforms' ),
-					esc_url( $renew_now_url ),
-					esc_html__( 'Renew Now', 'wpforms' ),
-					esc_url( $learn_more_url ),
-					esc_html__( 'Learn More', 'wpforms' )
-				);
+			$renew_now_url  = add_query_arg(
+				[
+					'utm_source'   => 'WordPress',
+					'utm_medium'   => 'Admin Notice',
+					'utm_campaign' => 'plugin',
+					'utm_content'  => 'Renew Now',
+				],
+				'https://wpforms.com/account/licenses/'
+			);
+			$learn_more_url = add_query_arg(
+				[
+					'utm_source'   => 'WordPress',
+					'utm_medium'   => 'Admin Notice',
+					'utm_campaign' => 'plugin',
+					'utm_content'  => 'Learn More',
+				],
+				'https://wpforms.com/docs/how-to-renew-your-wpforms-license/'
+			);
 
-				$this->print_error_notices( $notice, 'license-expired', $class );
+			$notice = sprintf(
+				'<h3 style="margin: .75em 0 0 0;">
+					<img src="%1$s" style="vertical-align: text-top; width: 20px; margin-right: 7px;">%2$s
+				</h3>
+				<p>%3$s</p>
+				<p>
+					<a href="%4$s" class="button-primary">%5$s</a> &nbsp
+					<a href="%6$s" class="button-secondary">%7$s</a>
+				</p>',
+				esc_url( WPFORMS_PLUGIN_URL . 'assets/images/exclamation-triangle.svg' ),
+				esc_html__( 'Heads up! Your WPForms license has expired.', 'wpforms' ),
+				esc_html__( 'An active license is needed to create new forms and edit existing forms. It also provides access to new features & addons, plugin updates (including security improvements), and our world class support!', 'wpforms' ),
+				esc_url( $renew_now_url ),
+				esc_html__( 'Renew Now', 'wpforms' ),
+				esc_url( $learn_more_url ),
+				esc_html__( 'Learn More', 'wpforms' )
+			);
 
+			\WPForms\Admin\Notice::error(
+				$notice,
+				[
+					'class' => $class,
+					'autop' => false,
+				]
+			);
 		endif;
 
 		// If a key has been disabled, output nag about using another key.
 		if ( isset( $option['is_disabled'] ) && $option['is_disabled'] ) {
-			$notice = sprintf(
-				'<h3 style="margin: .75em 0 0 0;">
-					<img src="%1$s" style="vertical-align: text-top; width: 20px; margin-right: 7px;">%2$s
-				</h3>
-				<p>%3$s</p>
-				<p>
-					<a href="%4$s" class="button-primary">%5$s</a> &nbsp
-					<a href="%6$s" class="button-secondary">%7$s</a>
-				</p>',
-				esc_url( WPFORMS_PLUGIN_URL . 'assets/images/exclamation-triangle.svg' ),
-				esc_html__( 'Heads up! Your WPForms license has been disabled.', 'wpforms' ),
-				esc_html__( 'Your license key for WPForms has been disabled. Please use a different key to continue receiving automatic updates', 'wpforms' ),
-				esc_url( $renew_now_url ),
-				esc_html__( 'Renew Now', 'wpforms' ),
-				esc_url( $learn_more_url ),
-				esc_html__( 'Learn More', 'wpforms' )
+			\WPForms\Admin\Notice::error(
+				esc_html__( 'Your license key for WPForms has been disabled. Please use a different key to continue receiving automatic updates.', 'wpforms' ),
+				[ 'class' => $class ]
 			);
-
-			$this->print_error_notices( $notice, 'license-diabled', $class );
 		}
 
 		// If a key is invalid, output nag about using another key.
 		if ( isset( $option['is_invalid'] ) && $option['is_invalid'] ) {
-
-			$notice = sprintf(
-				'<h3 style="margin: .75em 0 0 0;">
-					<img src="%1$s" style="vertical-align: text-top; width: 20px; margin-right: 7px;">%2$s
-				</h3>
-				<p>%3$s</p>
-				<p>
-					<a href="%4$s" class="button-primary">%5$s</a> &nbsp
-					<a href="%6$s" class="button-secondary">%7$s</a>
-				</p>',
-				esc_url( WPFORMS_PLUGIN_URL . 'assets/images/exclamation-triangle.svg' ),
-				esc_html__( 'Heads up! Your WPForms license is invalid.', 'wpforms' ),
-				esc_html__( 'The key no longer exists or the user associated with the key has been deleted. Please use a different key to continue receiving automatic updates.', 'wpforms' ),
-				esc_url( $renew_now_url ),
-				esc_html__( 'Renew Now', 'wpforms' ),
-				esc_url( $learn_more_url ),
-				esc_html__( 'Learn More', 'wpforms' )
+			\WPForms\Admin\Notice::error(
+				esc_html__( 'Your license key for WPForms is invalid. The key no longer exists or the user associated with the key has been deleted. Please use a different key to continue receiving automatic updates.', 'wpforms' ),
+				[ 'class' => $class ]
 			);
-
-			$this->print_error_notices( $notice, 'license-invalid', $class );
-
 		}
 
 		// If there are any license errors, output them now.
 		if ( ! empty( $this->errors ) ) {
-			Notice::error(
+			\WPForms\Admin\Notice::error(
 				implode( '<br>', $this->errors ),
 				[ 'class' => $class ]
 			);
@@ -621,7 +483,7 @@ class WPForms_License {
 
 		// If there are any success messages, output them now.
 		if ( ! empty( $this->success ) ) {
-			Notice::info(
+			\WPForms\Admin\Notice::info(
 				implode( '<br>', $this->success ),
 				[ 'class' => $class ]
 			);
@@ -629,81 +491,58 @@ class WPForms_License {
 	}
 
 	/**
-	 * Print error notices generated by the class.
-	 *
-	 * @since 1.8.2.3
-	 *
-	 * @param string $notice Notice html.
-	 * @param string $id     Notice id.
-	 * @param string $class  Notice classes.
-	 */
-	public function print_error_notices( $notice, $id, $class = '' ) {
-
-		if ( empty( $notice ) || empty( $id ) ) {
-			return;
-		}
-
-		Notice::error(
-			$notice,
-			[
-				'class' => $class,
-				'autop' => false,
-				'slug'  => 'license-expired',
-			]
-		);
-	}
-	/**
 	 * Retrieve addons from the stored transient or remote server.
 	 *
 	 * @since 1.0.0
-	 * @deprecated 1.8.0
 	 *
 	 * @param bool $force Whether to force the addons retrieval or re-use transient cache.
 	 *
-	 * @return array
+	 * @return array|bool
 	 */
 	public function addons( $force = false ) {
 
-		_deprecated_function( __METHOD__, '1.8.0 of the WPForms plugin', __CLASS__ . '::get_addons()' );
+		$key = $this->get();
 
-		if ( $force ) {
-			Transient::delete( 'addons' );
+		if ( ! $key ) {
+			return false;
 		}
 
-		return $this->get_addons();
+		$addons = Transient::get( 'addons' );
+
+		if ( $force || false === $addons ) {
+			$addons = $this->get_addons();
+		}
+
+		return $addons;
 	}
 
 	/**
 	 * Ping the remote server for addons data.
 	 *
 	 * @since 1.0.0
-	 * @since 1.8.0 Added transient cache check and license validation.
 	 *
-	 * @return array Addons data, maybe an empty array if an error occurred.
+	 * @return bool|array False if no key or failure, array of addon data otherwise.
 	 */
 	public function get_addons() {
 
-		$key = $this->get();
+		$key    = $this->get();
+		$addons = $this->perform_remote_request( 'get-addons-data', array( 'tgm-updater-key' => $key ) );
 
-		if ( empty( $key ) || ! $this->is_active() ) {
-			return [];
+		// If there was an API error, set transient for only 10 minutes.
+		if ( ! $addons ) {
+			Transient::set( 'addons', false, 10 * MINUTE_IN_SECONDS );
+
+			return false;
 		}
 
-		$addons = Transient::get( 'addons' );
+		// If there was an error retrieving the addons, set the error.
+		if ( isset( $addons->error ) ) {
+			Transient::set( 'addons', false, 10 * MINUTE_IN_SECONDS );
 
-		// We store an empty array if the request isn't valid to prevent spam requests.
-		if ( is_array( $addons ) ) {
-			return $addons;
+			return false;
 		}
 
-		$addons = $this->perform_remote_request( 'get-addons-data', [ 'tgm-updater-key' => $key ] );
-
-		if ( empty( $addons ) || isset( $addons->error ) ) {
-			Transient::set( 'addons', [], 10 * MINUTE_IN_SECONDS );
-
-			return [];
-		}
-
+		// Otherwise, our request worked. Save the data and return it.
 		Transient::set( 'addons', $addons, DAY_IN_SECONDS );
 
 		return $addons;
@@ -723,6 +562,16 @@ class WPForms_License {
 	 * @return mixed Json decoded response on success, false on failure.
 	 */
 	public function perform_remote_request( $action, $body = [], $headers = [], $return_format = 'json' ) {
+
+		if ( 'get-addons-data' === $action ) {
+			return json_decode( '[{"title":"ActiveCampaign Addon","slug":"wpforms-activecampaign","version":"1.2.1","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2020\/03\/addon-icon.png","excerpt":"The WPForms ActiveCampaign addon lets you add contacts to your account, record events, add notes to contacts, and more.","id":729633,"categories":["Agency","Elite","Ultimate"],"types":["agency","elite","ultimate"],"url":""},{"title":"Authorize.Net Addon","slug":"wpforms-authorize-net","version":"1.0.2","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2020\/05\/addon-icon-authorize-net.png","excerpt":"The WPForms Authorize.Net addon allows you to connect your WordPress site with Authorize.Net to easily collect payments, donations, and online orders.","id":845517,"categories":["Agency","Elite","Ultimate"],"types":["agency","elite","ultimate"],"url":""},{"title":"AWeber Addon","slug":"wpforms-aweber","version":"1.2.0","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/02\/addon-icon-aweber.png","excerpt":"The WPForms AWeber addon allows you to create AWeber newsletter signup forms in WordPress, so you can grow your email list. ","id":154,"categories":["Agency","Elite","Plus","Pro","Ultimate"],"types":["agency","elite","plus","pro","ultimate"],"url":""},{"title":"Campaign Monitor Addon","slug":"wpforms-campaign-monitor","version":"1.2.1","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/06\/addon-icon-campaign-monitor.png","excerpt":"The WPForms Campaign Monitor addon allows you to create Campaign Monitor newsletter signup forms in WordPress, so you can grow your email list. ","id":4918,"categories":["Agency","Elite","Plus","Pro","Ultimate"],"types":["agency","elite","plus","pro","ultimate"],"url":""},{"title":"Conversational Forms Addon","slug":"wpforms-conversational-forms","version":"1.5.0","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2019\/02\/addon-conversational-forms.png","excerpt":"Want to improve your form completion rate? Conversational Forms addon by WPForms helps make your web forms feel more human, so you can improve your conversions. Interactive web forms made easy.","id":391235,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"Custom Captcha Addon","slug":"wpforms-captcha","version":"1.3.0","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/08\/addon-icon-captcha.png","excerpt":"The WPForms Custom Captcha addon allows you to define custom questions or use random math questions as captcha to reduce spam form submissions.","id":7499,"categories":["Agency","Basic","Elite","Plus","Pro","Ultimate"],"types":["agency","basic","elite","plus","pro","ultimate"],"url":""},{"title":"Drip Addon","slug":"wpforms-drip","version":"1.4.2","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2018\/06\/addon-icon.png","excerpt":"The WPForms Drip addon allows you to create Drip newsletter signup forms in WordPress, so you can grow your email list. ","id":209878,"categories":["Agency","Elite","Plus","Pro","Ultimate"],"types":["agency","elite","plus","pro","ultimate"],"url":""},{"title":"Form Abandonment Addon","slug":"wpforms-form-abandonment","version":"1.4.3","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2017\/02\/addon-icon-form-abandonment.png","excerpt":"Unlock more leads by capturing partial entries from your forms. Easily follow up with interested leads and turn them into loyal customers.","id":27685,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"Form Locker Addon","slug":"wpforms-form-locker","version":"1.2.3","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2018\/09\/addon-icons-locker.png","excerpt":"The WPForms Form Locker addon allows you to lock your WordPress forms with various permissions and access control rules including passwords, members-only, specific date \/ time, max entry limit, and more.","id":265700,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"Form Pages Addon","slug":"wpforms-form-pages","version":"1.4.1","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2019\/01\/addon-icon-form-pages.png","excerpt":"Want to improve your form conversions? WPForms Form Pages addon allows you to create completely custom \"distraction-free\" form landing pages to boost conversions (without writing any code).","id":362485,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"Form Templates Pack Addon","slug":"wpforms-form-templates-pack","version":"1.2.0","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2017\/08\/addon-icon-form-templates-pack.png","excerpt":"Choose from a huge variety of pre-built templates for every niche and industry, so you can build all kinds of web forms in minutes, not hours.","id":71963,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"Geolocation Addon","slug":"wpforms-geolocation","version":"1.2.0","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/08\/addon-icon-geolocation.png","excerpt":"The WPForms Geolocation addon allows you to collect and store your website visitors geolocation data along with their form submission.","id":7501,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"GetResponse Addon","slug":"wpforms-getresponse","version":"1.2.0","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/04\/addon-icons-getresponse-1.png","excerpt":"The WPForms GetResponse addon allows you to create GetResponse newsletter signup forms in WordPress, so you can grow your email list. ","id":2565,"categories":["Agency","Elite","Plus","Pro","Ultimate"],"types":["agency","elite","plus","pro","ultimate"],"url":""},{"title":"Mailchimp Addon","slug":"wpforms-mailchimp","version":"1.4.2","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/02\/addon-icon-mailchimp-1.png","excerpt":"The WPForms Mailchimp addon allows you to create Mailchimp newsletter signup forms in WordPress, so you can grow your email list. ","id":153,"categories":["Agency","Elite","Plus","Pro","Ultimate"],"types":["agency","elite","plus","pro","ultimate"],"url":""},{"title":"Offline Forms Addon","slug":"wpforms-offline-forms","version":"1.2.2","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2017\/09\/addon-offline-forms.png","excerpt":"Never lose leads or data again. Offline Forms addon allows your users to save their entered data offline and submit when their internet connection is restored.","id":85564,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"PayPal Standard Addon","slug":"wpforms-paypal-standard","version":"1.3.4","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/02\/addon-icon-paypal.png","excerpt":"The WPForms PayPal addon allows you to connect your WordPress site with PayPal to easily collect payments, donations, and online orders.","id":155,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"Post Submissions Addon","slug":"wpforms-post-submissions","version":"1.3.1","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/10\/addon-icon-post-submissions.png","excerpt":"The WPForms Post Submissions addon makes it easy to have user-submitted content in WordPress. This front-end post submission form allow your users to submit blog posts without logging into the admin area.","id":11793,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"Salesforce Addon","slug":"wpforms-salesforce","version":"1.0.1","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2020\/09\/addon-icon-salesforce.png","excerpt":"The WPForms Salesforce addon allows you to easily send your WordPress form contacts and leads to your Salesforce CRM account.","id":1006060,"categories":["Agency","Elite","Ultimate"],"types":["agency","elite","ultimate"],"url":""},{"title":"Signature Addon","slug":"wpforms-signatures","version":"1.3.0","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/10\/wordpress-signature-form-plugin.png","excerpt":"The WPForms Signature addon makes it easy for users to sign your forms. This WordPress signature plugin will allow your users to sign contracts and other agreements with their mouse or touch screen.","id":15383,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"Stripe Addon","slug":"wpforms-stripe","version":"2.4.2","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/03\/addon-icon-stripe-1.png","excerpt":"The WPForms Stripe addon allows you to connect your WordPress site with Stripe to easily collect payments, donations, and online orders.","id":1579,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"Surveys and Polls Addon","slug":"wpforms-surveys-polls","version":"1.6.2","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2018\/02\/addon-icons-surveys-polls.png","excerpt":"The WPForms Survey Addon allows you to add interactive polls and survey forms to your WordPress site. It comes with best-in-class reporting to help you make data-driven decisions.","id":148223,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"User Journey Addon","slug":"wpforms-user-journey","version":"1.0.0","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2020\/11\/addon-icon-user-journey.png","excerpt":"Discover the steps your visitors take before they submit your forms. Right in the WordPress dashboard, you can easily see the content that\u2019s driving the most valuable form conversions.","id":1071426,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"User Registration Addon","slug":"wpforms-user-registration","version":"1.3.2","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/05\/addon-icon-user-registration.png","excerpt":"The WPForms User Registration addon allows you to create a custom WordPress user registration form, connect it to your newsletter, and collect payments.","id":3280,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""},{"title":"Webhooks Addon","slug":"wpforms-webhooks","version":"1.0.0","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2020\/07\/addon-icon-webhooks.png","excerpt":"The WPForms Webhooks addon allows you to send form entry data to secondary tools and external services. No code required, and no need for a third party connector.","id":901410,"categories":["Agency","Elite","Ultimate"],"types":["agency","elite","ultimate"],"url":""},{"title":"Zapier Addon","slug":"wpforms-zapier","version":"1.2.0","image":"https:\/\/wpforms.com\/wp-content\/uploads\/2016\/08\/zapier-addon-icon.png","excerpt":"The WPForms Zapier addon allows you to connect your WordPress forms with over 2000+ web apps. The integration possibilities here are just endless.","id":9141,"categories":["Agency","Elite","Pro","Ultimate"],"types":["agency","elite","pro","ultimate"],"url":""}]' );
+		}
+		if ( 'verify-key' === $action ) {
+			return json_decode( '{"success":"Congratulations! This site is now receiving automatic updates.","type":"elite","license":"**********"}');
+		}
+		if ( 'validate-key' === $action ) {
+			return json_decode( '{"success":"Congratulations! This key has been successfully validated.","type":"elite"}');
+		}
 
 		// Request query parameters.
 		$query_params = wp_parse_args(

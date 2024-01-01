@@ -81,7 +81,7 @@ var WPFormsAdminFormTemplates = window.WPFormsAdminFormTemplates || ( function( 
 			// Display loading indicator.
 			$button.html( spinner + wpforms_admin.loading );
 
-			WPFormsFormTemplates.selectTemplateProcess( $button.data( 'template-name-raw' ), $button.data( 'template' ), $button, app.selectTemplateProcessAjax );
+			app.selectTemplateProcessAjax( $button.data( 'template-name-raw' ), $button.data( 'template' ) );
 		},
 
 		/**
