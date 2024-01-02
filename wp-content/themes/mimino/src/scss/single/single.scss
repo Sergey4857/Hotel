@@ -1,0 +1,94 @@
+.blog-item {
+  width: 100%;
+  max-width: 1440px;
+  padding-top: 78px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 40px;
+
+  @media screen and (min-width: 768px) {
+    padding-left: 33px;
+    padding-right: 33px;
+    padding-top: 50px;
+    padding-bottom: 50px;
+  }
+
+  @media screen and (min-width: 1280px) {
+    padding-top: 78px;
+    position: relative;
+    display: flex;
+    gap: 40px;
+
+    justify-content: flex-end;
+  }
+
+  @import "../common/fonts.scss";
+  .blog-content {
+    position: relative;
+    @media screen and (min-width: 1280px) {
+      width: 50%;
+    }
+    .blog-date {
+      margin-bottom: 20px;
+    }
+
+    .blog-subtitle {
+      @include adaptiv-font(60, 50);
+      color: #121212;
+      text-transform: uppercase;
+
+      font-weight: 400;
+      line-height: 100%;
+      letter-spacing: -1.6px;
+      text-transform: uppercase;
+
+      margin-bottom: 24px;
+
+      @media screen and (min-width: 768px) {
+        color: #121212;
+        line-height: 1;
+        letter-spacing: -2px;
+      }
+      @media screen and (min-width: 1440px) {
+        padding-top: 0;
+      }
+    }
+    .blog-text {
+      margin-bottom: 40px;
+      @media screen and (min-width: 1440px) {
+        margin-bottom: 0;
+      }
+    }
+
+    .blog-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      .blog-price {
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .article-back {
+        margin-bottom: 40px;
+        display: block;
+        font-weight: 700;
+
+        @media screen and (min-width: 1280px) {
+          margin-top: 20px;
+        }
+      }
+    }
+  }
+  .blog-image-content {
+    display: block;
+
+    @media screen and (min-width: 1280px) {
+      width: 50%;
+    }
+    .blog-picture {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+}

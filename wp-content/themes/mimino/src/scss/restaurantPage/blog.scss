@@ -81,7 +81,7 @@
               letter-spacing: -0.28px;
               text-transform: uppercase;
               max-height: 165px;
-              overflow-y: auto;
+              overflow: hidden;
               scrollbar-width: thin;
               scrollbar-color: #555 #363636;
               &::-webkit-scrollbar {

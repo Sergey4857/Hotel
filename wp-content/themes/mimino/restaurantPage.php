@@ -229,7 +229,7 @@ $restaurant_menu_section = get_field("section-restaurant-menu");
             foreach ($myposts as $post) {
               setup_postdata($post);
               ?>
-              <div class="blog-item">
+              <a href="<?php echo get_permalink() ?>" class="blog-item">
                 <div class="blog-disk-box">
                   <p class="blog-dish-title">
                     <?php the_title() ?>
@@ -239,7 +239,7 @@ $restaurant_menu_section = get_field("section-restaurant-menu");
                   </div>
                 </div>
                 <img src="<?php the_post_thumbnail_url(); ?>" alt="Cheese soup">
-              </div>
+              </a>
               <?php
             }
           } else {
